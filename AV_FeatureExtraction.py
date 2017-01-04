@@ -10,6 +10,8 @@
 #creates new csv for output
 #runs feature extraction: OpenFace/bin/FeatureExtraction -f /path/to/mov -of /path/to/.csv
 
+#Extract audio (wav) from video - ffmpeg -i Example.mov -vn -acodec pcm_s16le -ar 44100 -ac 2 Example.wav
+
 ### COVAREP ###
 #Feature extraction with covarep
 #ToDo
