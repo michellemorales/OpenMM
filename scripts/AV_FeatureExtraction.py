@@ -24,15 +24,15 @@
 ### Dependencies ###
 # OpenFace
 # ffmpeg
-# Covarep
 # Matlab
 
 import sys, os, subprocess
 import speech_recognition as sr
 
-def extract_visual(video, csv):
+def extract_visual(video):
     #Extracts visual features using OpenFace, requires the OpenFace () repo to be installed
     pathOpenFace =''
+    csv = video.replace('.mp4','.csv')
     newF = open(csv,'w')
     print 'Launching OpenFace to extract visual features... \n\n\n\n\n'
     command = '/Users/morales/GitHub/OpenFace/bin/FeatureExtraction -f %s -of %s'%(video, csv)
@@ -42,7 +42,7 @@ def extract_visual(video, csv):
 def video2audio(video):
     #Converts video to audio using ffmpeg, requires ffmpeg to be installed
     wav = video.replace('.mp4','.wav')
-    command = 'ffmpeg -i %s -vn -acodec pcm_s16le -ar 44100 -ac 2 %s'%(video, wav)
+    command = 'ffmpeg -i %s -acodec pcm_s16le -ac 1 -ar 16000 %s'%(video, wav)
     subprocess.call(command, shell=True)
     print 'DONE! Video converted to audio file: %s'%wav
 
@@ -54,24 +54,37 @@ def extract_audio(audio_dir):
     subprocess.call(command, shell=True)
     print 'DONE! Audio features saved to .mat file in %s directory.' %audio_dir
 
-def speech2text(audio_file,lang):
+def google_speech2text(audio_file,lang):
     GOOGLE_SPEECH_RECOGNITION_API_KEY = 'AIzaSyCQNG-Jeageo_myq7MJTBzoxAdSq8oqASc'
-    ### TODO: FIX THIS FUNCTION ###
     r = sr.Recognizer()
     with sr.AudioFile(audio_file) as source:
         audio = r.record(source)
-    # recognize speech using Google Speech Recognition
+    #Recognize speech using Google Speech Recognition
     try:
-    # for testing purposes, we're just using the default API key
-    # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
-    # instead of `r.recognize_google(audio)`
         print("Google Speech Recognition thinks you said " + r.recognize_google(audio, key=GOOGLE_SPEECH_RECOGNITION_API_KEY, language=lang))
     except sr.UnknownValueError:
         print("Google Speech Recognition could not understand audio")
     except sr.RequestError as e:
         print("Could not request results from Google Speech Recognition service; {0}".format(e))
 
-extract_visual('FerrisBuellerClip.mp4','FBTest.csv')
-video2audio('FerrisBuellerClip.mp4')
-extract_audio('/Users/morales/GitHub/Dissertation')
-speech2text('FerrisBuellerClip.wav','en-US')
+def speech2text(audio_file,lang):
+    IBM_USERNAME = "28e8d133-29a7-477e-9544-d3ac977218ab"
+    IBM_PASSWORD = "JPyxiE3a4ADK"
+    r = sr.Recognizer()
+    with sr.AudioFile(audio_file) as source:
+        audio = r.record(source)
+    #Recognize speech using IBM Speech to Text
+    try:
+        result = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD, language='en-US') #show_all=True - returns json
+        print(result)
+    except sr.UnknownValueError:
+        print("IBM Speech to Text could not understand audio")
+    except sr.RequestError as e:
+        print("Could not request results from IBM Speech to Text service; {0}".format(e))
+
+
+if __name__ == '__main__':
+    extract_visual('../FerrisBuellerClip.mp4')
+    video2audio('../FerrisBuellerClip.mp4')
+    extract_audio('/Users/morales/GitHub/Dissertation')
+    speech2text('../FerrisBuellerClip.wav','en-US')
