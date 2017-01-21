@@ -20,13 +20,12 @@
 #covarep/feature_extraction/COVAREP_feature_extraction.m
 #/Applications/MATLAB_R2016a.app/bin/matlab -nodisplay -nosplash -nodesktop -r "COVAREP_feature_extraction('/Users/morales/Desktop/');exit"
 
-
 ### Dependencies ###
 # OpenFace
 # ffmpeg
 # Matlab
 
-import sys, os, subprocess
+import sys, os, subprocess, ling_analysis
 import speech_recognition as sr
 
 def extract_visual(video):
@@ -87,4 +86,5 @@ if __name__ == '__main__':
     extract_visual('../FerrisBuellerClip.mp4')
     video2audio('../FerrisBuellerClip.mp4')
     extract_audio('/Users/morales/GitHub/Dissertation')
-    speech2text('../FerrisBuellerClip.wav','en-US')
+    transcript = speech2text('../FerrisBuellerClip.wav','en-US')
+    ling_analysis(transcript)
