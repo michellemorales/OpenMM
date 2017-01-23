@@ -87,4 +87,4 @@ if __name__ == '__main__':
     video2audio('../FerrisBuellerClip.mp4')
     extract_audio('/Users/morales/GitHub/Dissertation')
     transcript = speech2text('../FerrisBuellerClip.wav','en-US')
-    ling_analysis(transcript)
+    LingAnalysis(transcript)
