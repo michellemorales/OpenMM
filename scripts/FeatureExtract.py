@@ -25,7 +25,7 @@
 # ffmpeg
 # Matlab
 
-import sys, os, subprocess, ling_analysis
+import sys, os, subprocess,json #, ling_analysis
 import speech_recognition as sr
 
 def extract_visual(video):
@@ -69,13 +69,17 @@ def google_speech2text(audio_file,lang):
 def speech2text(audio_file,lang):
     IBM_USERNAME = "28e8d133-29a7-477e-9544-d3ac977218ab"
     IBM_PASSWORD = "JPyxiE3a4ADK"
+    json_name = audio_file.replace(".wav",".json")
     r = sr.Recognizer()
     with sr.AudioFile(audio_file) as source:
         audio = r.record(source)
     #Recognize speech using IBM Speech to Text
     try:
-        result = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD, language='en-US') #show_all=True - returns json
+        result = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD, language='en-US',show_all=True,timestamps=True) #show_all=True
         print(result)
+        new_f = open(json_name,"w") #create a file to write json object to
+        json.dump(result, new_f)
+        new_f.close()
     except sr.UnknownValueError:
         print("IBM Speech to Text could not understand audio")
     except sr.RequestError as e:
@@ -83,8 +87,8 @@ def speech2text(audio_file,lang):
 
 
 if __name__ == '__main__':
-    extract_visual('../FerrisBuellerClip.mp4')
-    video2audio('../FerrisBuellerClip.mp4')
-    extract_audio('/Users/morales/GitHub/Dissertation')
-    transcript = speech2text('../FerrisBuellerClip.wav','en-US')
-    LingAnalysis(transcript)
+    # extract_visual('../Examples/FerrisBuellerClip.mp4')
+    # video2audio('../Examples/FerrisBuellerClip.mp4')
+    # extract_audio('/Users/morales/GitHub/Dissertation')
+    # transcript = speech2text('../Examples/FerrisBuellerClip.wav','en-US')
+    LingAnalysis("FerrisBuellerClip3.json")
