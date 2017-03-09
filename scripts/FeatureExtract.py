@@ -25,13 +25,14 @@
 # ffmpeg
 # Matlab
 
-import sys, os, subprocess,json #, ling_analysis
+import sys, os, subprocess,json, LingAnalysis, pandas, scipy.stats, os.path
 import speech_recognition as sr
+import numpy as np
 
 def extract_visual(video):
     #Extracts visual features using OpenFace, requires the OpenFace () repo to be installed
     pathOpenFace =''
-    csv = video.replace('.mp4','.csv')
+    csv = video.replace('.mp4','_openface.csv')
     newF = open(csv,'w')
     print 'Launching OpenFace to extract visual features... \n\n\n\n\n'
     command = '/Users/morales/GitHub/OpenFace/bin/FeatureExtraction -f %s -of %s'%(video, csv)
@@ -69,26 +70,78 @@ def google_speech2text(audio_file,lang):
 def speech2text(audio_file,lang):
     IBM_USERNAME = "28e8d133-29a7-477e-9544-d3ac977218ab"
     IBM_PASSWORD = "JPyxiE3a4ADK"
-    json_name = audio_file.replace(".wav",".json")
+    json_name = audio_file.replace(".wav","_transcript.json")
     r = sr.Recognizer()
+
     with sr.AudioFile(audio_file) as source:
         audio = r.record(source)
     #Recognize speech using IBM Speech to Text
     try:
-        result = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD, language='en-US',show_all=True,timestamps=True) #show_all=True
-        print(result)
+        result = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD, language='en-US',show_all=True,timestamps=True)
         new_f = open(json_name,"w") #create a file to write json object to
         json.dump(result, new_f)
         new_f.close()
+
     except sr.UnknownValueError:
         print("IBM Speech to Text could not understand audio")
     except sr.RequestError as e:
         print("Could not request results from IBM Speech to Text service; {0}".format(e))
 
+def combine_modes(file_name):
+    visualF = file_name.replace('.mp4','_openface.csv')
+    audioF = file_name.replace('.mp4','_covarep.csv')
+    lingF = file_name.replace('.mp4','_ling.csv')
+    mmF = file_name.replace('.mp4','_multimodal.csv')
+
+    files = [visualF,audioF,lingF]
+    stats_names = ['max','min','mean','median','std','var','kurt','skew','percentile25','percentile50','percentile75']
+    mm_feats = []
+    mm_names = []
+    for f in files:
+        df = pandas.read_csv(f,header='infer')
+        feature_names = df.columns.values
+        for f in feature_names:
+            vals = df[f].values #Feature vector
+            #Run statistics
+            maximum = np.nanmax(vals)
+            minimum = np.nanmin(vals)
+            mean = np.nanmean(vals)
+            median = np.nanmedian(vals)
+            std = np.nanstd(vals)
+            var = np.nanvar(vals)
+            kurt = scipy.stats.kurtosis(vals)
+            skew = scipy.stats.skew(vals)
+            percentile25 = np.nanpercentile(vals,25)
+            percentile50 = np.nanpercentile(vals, 50)
+            percentile75 =  np.nanpercentile(vals, 75)
+            names = [f.strip()+"_"+stat for stat in stats_names]
+            feats = [maximum, minimum, mean, median, std, var, kurt, skew, percentile25, percentile50, percentile75]
+            for n in names:
+                mm_names.append(n)
+            for f in feats:
+                mm_feats.append(f)
+    newF = open(mmF,'w')
+    newF.write(','.join(mm_names)+'\n')
+    newF.write(','.join([str(mm) for mm in mm_feats]))
+    newF.close()
+    print 'Done combining modalities!'
+
 
 if __name__ == '__main__':
-    # extract_visual('../Examples/FerrisBuellerClip.mp4')
-    # video2audio('../Examples/FerrisBuellerClip.mp4')
-    # extract_audio('/Users/morales/GitHub/Dissertation')
-    # transcript = speech2text('../Examples/FerrisBuellerClip.wav','en-US')
-    LingAnalysis("FerrisBuellerClip3.json")
+    dir = sys.argv[1]
+    files = os.listdir(dir)
+
+    #Extract visual features
+    for f in files:
+        extract_visual(os.path.join(dir,f))
+        video2audio(os.path.join(dir,f))
+
+    #Extract audio features
+    extract_audio(dir)
+
+    #Speech to text and extract ling features
+    audio_files = [f for f in files if f.endswith('.wav')]
+    for f in audio_files:
+        speech2text(os.path.join(dir,f),'en-US')
+        LingAnalysis.run(os.path.join(dir,f.replace('.wav','_transcript.json')))
+        combine_modes(os.path.join(dir,f.replace('.wav','.mp4'))) #Combine modalities
