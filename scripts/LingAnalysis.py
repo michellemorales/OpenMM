@@ -1,12 +1,8 @@
 #Michelle Morales
 #Script performs linguistic analysis
 
-# Arguments = text file containing dependency tree from Google's Parsey McParseface
-# Features= [# of dependents, root,  ]
-
 # Each parse try from Parsey comes in a CONLL format, details can be found: http://universaldependencies.org/docs/format.html
 # The basic structure of each row the conll table is as follows
-
 # ID: Word index, integer starting at 1 for each new sentence; may be a range for tokens with multiple words.
 # FORM: Word form or punctuation symbol.
 # LEMMA: Lemma or stem of word form.
@@ -22,11 +18,14 @@
 from __future__ import division
 from collections import defaultdict
 from gensim.models import word2vec
-import sys, re, pandas, numpy
-
+import sys, re, pandas, numpy, os, subprocess, json
 
 ### SYNTAX FEATURES ###
-# def parse():
+def parse(transcript):
+    os.chdir(r"/Users/morales/Github/models/syntaxnet")
+    command = "echo '%s' | syntaxnet/demo.sh" %transcript
+    output = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
+    return output
 def dependency_distance(conll_df):
     """ Computes dependency distance for dependency tree. Based off of:
     Pakhomov, Serguei, et al. "Computerized assessment of syntactic complexity
@@ -38,7 +37,7 @@ def dependency_distance(conll_df):
     total_distance = sum(diff)
     return total_distance
 def load_tags():
-    with open('PennTreebankTagList.txt','r') as f:
+    with open('/Users/morales/GitHub/Dissertation/data/PennTreebankTagList.txt','r') as f:
         tags = [line.strip().split()[1] for line in f.readlines()]
     return tags
 
@@ -99,111 +98,107 @@ def embedding_distance(conll_df,word2vec_model):
                 d = 0
     total_sim = sum(cos_sim)
     return total_sim
+def get_liwc(transcript):
+        """ Get features using LIWC 2015. categories in total."""
+        categories = []
+        liwcD = {}
+        catsD = {}
+        liwc_file = '/Users/morales/GitHub/Dissertation/data/LIWC2015_English.dic'
+        read = open(liwc_file,'r').readlines()
+        header = read[1:74]
+        for line in header:
+            items = line.strip().split()
+            category_name = items[1]
+            category_numb = items[0].strip()
+            categories.append(category_name)
+
+            catsD[int(category_numb)] = category_name
+        liwc_words = read[88:] #ignore emojis
+        for line in liwc_words:
+            items = line.strip().split('\t')
+            word = items[0].replace('(','').replace(')','')
+            cats = items[1:]
+            liwcD[word] = cats
+
+        total_words = len(transcript.split())
+        feats = defaultdict(int)
+        for word in sorted(liwcD.keys()):
+            cats = liwcD[word]
+            if '*' in word:
+                pattern = re.compile(' %s'%word.replace('*',''))
+            else:
+                pattern = re.compile(' %s '%word)
+            matches = [(m.start(0), m.end(0)) for m in re.finditer(pattern, transcript)]
+            if matches != []:
+                for C in cats:
+                    feats[int(C)]+=len(matches)
+            else:
+                for C in cats:
+                    feats[int(C)] += 0
+        if total_words != 0:
+            liwc_features = [(float(feats[key])) for key in sorted(feats.keys())]
+        else:
+            liwc_features = ','.join(str(i) for i in [0]*len(categories))
+        header = ','.join([catsD[cat] for cat in sorted(feats.keys())])
+        return header, liwc_features
+
+### RUN FEATURE EXTRACTION FUNCTIONS ###
+def run(file_name):
+    with open(file_name) as data_file:
+        data = json.load(data_file)
+    transcription = []
+    for utterance in data["results"]:
+        if "alternatives" not in utterance: raise UnknownValueError()
+        for hypothesis in utterance["alternatives"]:
+            if "transcript" in hypothesis:
+                transcription.append(hypothesis["transcript"])
+
+    model = word2vec.Word2Vec.load('/Users/morales/GitHub/Dissertation/data/fisher-vectors-100dim-check20iter')
+    liwc_cats, liwc_feats = get_liwc(' ')
+    tags = load_tags()
+    openF = open(file_name.replace('_transcript.json','_ling.csv'),'w')
+    header = '%s,word_count, avg_wordlen,levels,dep_dist,coherence, univ_tag, fine_tag,%s\n'%(liwc_cats,','.join(tags))
+    openF.write(header)
+    feature_list = []
+    for sentence in transcription:
+        print sentence
+        words = sentence.strip().split()
+        word_count = len(words)
+        #Get semantic (LIWC) features
+        liwc_cats, liwc_feats = get_liwc(sentence) #fix liwc script
+        #Get syntactic features
+        conll = parse(sentence).strip()
+        conll_lines = conll.split('\n')
+        conll_table = [line.split('\t') for line in conll_lines]
+        df = pandas.DataFrame(conll_table,columns=['ID','FORM','LEMMA','UPOS','XPOS','FEATS','HEAD','DEPREL','DEPS','MISC'])
+
+        #Get frequency of each POS tag
+        tag_freq = []
+        for tag in sorted(tags):
+            x_tags = df['XPOS'].values.tolist()
+            count = x_tags.count(tag)
+            tag_freq.append(count)
+
+        #Calculates syntactic dependency distance using conll tree
+        dep_dist = dependency_distance(df)
+
+        #Calculates semantic coherence using cosine similarity measures between head/dependent relations
+        coherence = embedding_distance(df, model)
+
+        # Get the number of unique POS tags (coarse and fine)
+        u_tags = df['UPOS'].values
+        x_tags = df['XPOS'].values
+        univ_tag = len(set(u_tags))
+        fine_tag = len(set(x_tags))
+        #Get number of parents/children/depth of tree
+        heads = df['HEAD'].values
+        levels = len(set(heads))
+        avg_wordlen = sum([len(w) for w in words])/len(words)
 
 
-
-
-
-pattern = re.compile(r'^\<TREE\>.*?\<\/TREE\>',re.DOTALL|re.MULTILINE) # Use the <TREE> Tags to find each distinct parse
-trees = pattern.findall(data)
-context = 'context_'
-syntaxF = open(('%s.%ssyntax'%(file,context)).replace('conll','features'),'w')
-semanticsF = open(('%s.%ssemantics'%(file,context)).replace('conll','features'),'w')
-liwcF = open(('%s.%sliwc'%(file,context)).replace('conll','features'),'w')
-combinedF = open(('%s.%sall'%(file,context)).replace('conll','features'),'w')
-combinedF_liwc = open(('%s.%sall+liwc'%(file,context)).replace('conll','features'),'w')
-# vec = []
-# for i in range(100):
-#     vec.append('word%s'%i)
-# part1 = 'root_deps,levels,u_tag,x_tag,avg_wordlen,numb_words,dep_dist'
-# part2 = ','.join(vec)
-# part3 = ",".join([x.strip().replace('\t','').replace(' ','_') for x in header])
-# print 'ID,Sentence,%s,%s,coherence,%s'%(part1,part2,part3)
-
-# new_file = open(outF,'w')
-# tags = load_tags()
-# tag_header = sorted(tags) + ['average_wordLen','numb_words']+['ID']
-# # ['word_%s'%i for i in range(100)]
-# feature_header = ','.join(['avg_word_%s'%i for i in range(100)] + ['dep_count', 'root_dep_count', 'depth_levels', 'unique_utags', 'unique_xtags', 'cc_count', 'total_dist', 'total_sim'] + tag_header)
-# new_file.write(feature_header+'\n')
-
-model = word2vec.Word2Vec.load('/home/michelle/ICT/fisher-vectors-100dim-check20iter') # TODO: change word2vec model to Fisher# Load word2vec model only once
-# tags = load_tags() #load pos tag list
-# print 'Done loading word2vec model..'
-remove_NaNs = [319,342,668,669,931]
-trees = get_context(trees)
-if type(trees) == list: #i.e. - no upsampling has occurred
-    for i, T in enumerate(trees):
-        lines = T.split('\n')
-        ID = lines[0].strip().split()[-1] #first line contains meta info, including data index and participant ID
-        if int(ID) not in remove_NaNs and len(T.split('\n')) > 2:
-            conll_table = [line.split('\t') for line in lines[1:-2]] # convert conll table to pandas data frame for easier processing
-            df = pandas.DataFrame(conll_table,columns=['ID','FORM','LEMMA','UPOS','XPOS','FEATS','HEAD','DEPREL','DEPS','MISC'])
-            words = df['FORM'].values #get words
-            roles = df['DEPREL'].values
-            if len(words) != 0 and len(words) > 3 and len(words) < 30: # ONLY IF NSubj is included!
-                # vectors = get_word2vecs(model,words) #use if we want sequences
-                avg_vector = average_word2vecs(model,words)
-                root_index = df.loc[df['DEPREL']=='ROOT'].index.tolist() # Find root word
-                if root_index != []:
-                        r = df.at[root_index[0],'FORM']
-                        root_id = df.at[root_index[0],'ID']
-                        root_children = df.loc[df['HEAD']==root_id]
-                        root_deps = len(root_children) #root's direct children
-                        try:
-                            vec = numpy.array(model[r])
-                        except:
-                            vec = numpy.array([0]*100)
-                else:
-                    roots_id = 0
-                    root_children = 0
-
-
-                #Calculates syntactic dependency distance using conll tree
-                dep_dist = dependency_distance(df)
-
-                #Calculates semantic coherence using cosine similarity measures between head/dependent relations
-                coherence = embedding_distance(df, model)
-
-                #Get number of parents/children/depth of tree
-                heads = df['HEAD'].values
-                levels = len(set(heads)) #TODO:figure out what to name this, could also be number of relations
-                # Get the number of unique POS tags (coarse and fine)
-                u_tags = df['UPOS'].values
-                x_tags = df['XPOS'].values
-                u_tag = len(set(u_tags))
-                x_tag = len(set(x_tags))
-
-                #Get frequency of each POS tag
-                tag_freq = []
-                tags = load_tags()
-                for tag in sorted(tags):
-                    x_tags = df['XPOS'].values.tolist()
-                    count = x_tags.count(tag)
-                    tag_freq.append(count)
-
-                #Calculate average word length and total number of words
-                avg_wordlen = sum([len(w) for w in words])/len(words)
-                numb_words = len(words)
-
-                #Sentence
-                sent = ' '.join(words)
-                #LIWC features - p.s. liwc funciton already normalizes features
-                liwc_features = ','.join([str(x) for x in liwc(words)])
-                liwcF.write('%s,%s,%s\n'%(ID,sent,liwc_features))
-                #Syntax features - TODO:NORMALIZE - done!
-                syntax = [feat/len(words) for feat in [root_deps,levels,u_tag,x_tag,avg_wordlen,numb_words,dep_dist]]#Remove tag freq
-                syntax_features = ','.join([str(feat) for feat in syntax])
-                syntaxF.write('%s,%s,%s\n'%(ID,sent,syntax_features))
-                #Semantic features
-                semantics = coherence/len(words)
-                avg_sent = ','.join([str(x) for x in avg_vector])
-                semantics_features = '%s,%s'%(avg_sent,coherence)
-                semanticsF.write('%s,%s,%s\n'%(ID,sent,semantics_features))
-                #Combined features
-                all_feats = '%s,%s,%s,%s\n'%(ID,sent,syntax_features,semantics_features)
-                combinedF.write(all_feats)
-                #Combined features+LIWC
-                all_feats_liwc = '%s,%s,%s,%s,%s\n'%(ID,sent,syntax_features,semantics_features,liwc_features)
-                combinedF_liwc.write(all_feats_liwc)
-                print all_feats_liwc
+        syntax_feats = [word_count, avg_wordlen,levels,dep_dist,coherence, univ_tag, fine_tag] + tag_freq
+        features = ','.join([str(f) for f in liwc_feats + syntax_feats])
+        feature_list.append(features)
+    for s in feature_list:
+        openF.write(s+'\n')
+    print 'Done processing transcript. Linguistic features saved to file!'
