@@ -3,8 +3,8 @@
 % Description
 %  This script extracts features to do with glottal source and spectral
 %  envelope available with the COVAREP repository. For each .wav file in
-%  the inputted directory path, .mat files are produced containing 
-% 
+%  the inputted directory path, .mat files are produced containing
+%
 % Input
 %  in_dir [directory path] : Path to directory containing wav files to be analysed
 %  sample_rate [seconds] : feature sampling rate in seconds (optional)
@@ -24,14 +24,14 @@
 %
 % License
 %  This file is under the LGPL license,  you can
-%  redistribute it and/or modify it under the terms of the GNU Lesser General 
-%  Public License as published by the Free Software Foundation, either version 3 
+%  redistribute it and/or modify it under the terms of the GNU Lesser General
+%  Public License as published by the Free Software Foundation, either version 3
 %  of the License, or (at your option) any later version. This file is
-%  distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-%  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+%  distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+%  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 %  PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
 %  details.
-% 
+%
 % Note
 %  This function has been developed and tested on speech signals sampled
 %  at 16 kHz. Though the analysis should be sampling frequency independent
@@ -95,7 +95,7 @@ end
 
 %% Do processing
 for n=1:N
-   
+
     basename=regexp(fileList(n).name,'\.wav','split');
     basename=char(basename(1));
     disp(['Analysing file: ' basename])
@@ -103,7 +103,7 @@ for n=1:N
         % Load file and set sample locations
         [x,fs]=audioread([in_dir filesep basename '.wav']);
         feature_sampling=round((sample_rate/2)*fs):round(sample_rate*fs):length(x);
-        
+
         % Check if signal is mono or stereo
         if(size(x, 2) ~= 1)
             warning(['file: ' basename ' is not a mono signal. processing only first channel.']);
@@ -114,14 +114,14 @@ for n=1:N
         polarity = polarity_reskew(x,fs);
         x=polarity*x; % Correct polarity if necessary
 
-        % F0/GCI detection 
+        % F0/GCI detection
         [srh_f0,srh_vuv,~,srh_time] = pitch_srh(x,fs,F0min,F0max, ...
             sample_rate*1000);
         F0med=median(srh_f0(srh_f0>F0min&srh_f0<F0max&srh_vuv==1));
         F0 = interp1(round(srh_time*fs),srh_f0,feature_sampling);
         VUV = interp1(round(srh_time*fs),srh_vuv,feature_sampling);
         VUV_int = interp1(round(srh_time*fs),srh_vuv,1:length(x));
-        VUV(isnan(VUV)==1)=0; VUV_int(isnan(VUV_int)==1)=0; 
+        VUV(isnan(VUV)==1)=0; VUV_int(isnan(VUV_int)==1)=0;
         VUV(VUV>=.5)=1; VUV(VUV<.5)=0;
 
         GCI = gci_sedreams(x,fs,F0med,1); % SEDREAMS GCI detection
@@ -201,13 +201,22 @@ for n=1:N
         features=[F0(:) VUV(:) NAQ(:) QOQ(:) H1H2(:) PSP(:) MDQ(:) PS(:) ...
             Rd(:) Rd_conf(:) creak_pp(:) MCEP_int HMPDM HMPDD];
         features(isnan(features))=0;
-        save([in_dir filesep basename '.mat'],'features','names')
-        clear features
+        %save([in_dir filesep basename '.mat'],'features','names')
 
+        %write header to file
+        fid = fopen([in_dir filesep basename '_covarep.csv'],'w');
+        commaHeader = [names;repmat({','},1,numel(names))];
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);
+        fprintf(fid,'%s\n',textHeader)
+        fclose(fid)
+        %write data to end of file
+        dlmwrite([in_dir filesep basename '_covarep.csv'],features,'-append');
+        clear features
         disp([basename ' successfully analysed'])
-        
+
     catch err
         warning(['An error occurred while analysing ' basename ': ' getReport(err)])
     end
-    
+
 end
