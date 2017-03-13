@@ -24,8 +24,12 @@ import sys, re, pandas, numpy, os, subprocess, json
 def parse(transcript):
     os.chdir(r"/Users/morales/Github/models/syntaxnet")
     command = "echo '%s' | syntaxnet/demo.sh" %transcript
-    output = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
+    try:
+        output = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
+    except:
+        output = False
     return output
+
 def dependency_distance(conll_df):
     """ Computes dependency distance for dependency tree. Based off of:
     Pakhomov, Serguei, et al. "Computerized assessment of syntactic complexity
@@ -167,36 +171,41 @@ def run(file_name):
         #Get semantic (LIWC) features
         liwc_cats, liwc_feats = get_liwc(sentence) #fix liwc script
         #Get syntactic features
-        conll = parse(sentence).strip()
-        conll_lines = conll.split('\n')
-        conll_table = [line.split('\t') for line in conll_lines]
-        df = pandas.DataFrame(conll_table,columns=['ID','FORM','LEMMA','UPOS','XPOS','FEATS','HEAD','DEPREL','DEPS','MISC'])
+        if word_count > 0:
+            conll = parse(sentence)
+            if conll:
 
-        #Get frequency of each POS tag
-        tag_freq = []
-        for tag in sorted(tags):
-            x_tags = df['XPOS'].values.tolist()
-            count = x_tags.count(tag)
-            tag_freq.append(count)
+                conll_lines = conll.strip().split('\n')
+                conll_table = [line.split('\t') for line in conll_lines]
+                df = pandas.DataFrame(conll_table,columns=['ID','FORM','LEMMA','UPOS','XPOS','FEATS','HEAD','DEPREL','DEPS','MISC'])
 
-        #Calculates syntactic dependency distance using conll tree
-        dep_dist = dependency_distance(df)
+                #Get frequency of each POS tag
+                tag_freq = []
+                for tag in sorted(tags):
+                    x_tags = df['XPOS'].values.tolist()
+                    count = x_tags.count(tag)
+                    tag_freq.append(count)
 
-        #Calculates semantic coherence using cosine similarity measures between head/dependent relations
-        coherence = embedding_distance(df, model)
+                #Calculates syntactic dependency distance using conll tree
+                dep_dist = dependency_distance(df)
 
-        # Get the number of unique POS tags (coarse and fine)
-        u_tags = df['UPOS'].values
-        x_tags = df['XPOS'].values
-        univ_tag = len(set(u_tags))
-        fine_tag = len(set(x_tags))
-        #Get number of parents/children/depth of tree
-        heads = df['HEAD'].values
-        levels = len(set(heads))
-        avg_wordlen = sum([len(w) for w in words])/len(words)
+                #Calculates semantic coherence using cosine similarity measures between head/dependent relations
+                coherence = embedding_distance(df, model)
 
-
-        syntax_feats = [word_count, avg_wordlen,levels,dep_dist,coherence, univ_tag, fine_tag] + tag_freq
+                # Get the number of unique POS tags (coarse and fine)
+                u_tags = df['UPOS'].values
+                x_tags = df['XPOS'].values
+                univ_tag = len(set(u_tags))
+                fine_tag = len(set(x_tags))
+                #Get number of parents/children/depth of tree
+                heads = df['HEAD'].values
+                levels = len(set(heads))
+                avg_wordlen = sum([len(w) for w in words])/len(words)
+                syntax_feats = [word_count, avg_wordlen,levels,dep_dist,coherence, univ_tag, fine_tag] + tag_freq
+            else:
+                 syntax_feats = 43 * [0]
+        else:
+            syntax_feats = 43 * [0]
         features = ','.join([str(f) for f in liwc_feats + syntax_feats])
         feature_list.append(features)
     for s in feature_list:
