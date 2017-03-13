@@ -25,7 +25,7 @@
 # ffmpeg
 # Matlab
 
-import sys, os, subprocess,json, LingAnalysis, pandas, scipy.stats, os.path
+import sys, os, subprocess,json, LingAnalysis, pandas, scipy.stats, os.path, glob
 import speech_recognition as sr
 import numpy as np
 
@@ -81,6 +81,7 @@ def speech2text(audio_file,lang):
         new_f = open(json_name,"w") #create a file to write json object to
         json.dump(result, new_f)
         new_f.close()
+        print("Audio file processed transcript saved json file!")
 
     except sr.UnknownValueError:
         print("IBM Speech to Text could not understand audio")
@@ -88,11 +89,12 @@ def speech2text(audio_file,lang):
         print("Could not request results from IBM Speech to Text service; {0}".format(e))
 
 def combine_modes(file_name):
+    print file_name
     visualF = file_name.replace('.mp4','_openface.csv')
     audioF = file_name.replace('.mp4','_covarep.csv')
     lingF = file_name.replace('.mp4','_ling.csv')
     mmF = file_name.replace('.mp4','_multimodal.csv')
-
+    print visualF, audioF, lingF, '\n\n\n\n\n\n'
     files = [visualF,audioF,lingF]
     stats_names = ['max','min','mean','median','std','var','kurt','skew','percentile25','percentile50','percentile75']
     mm_feats = []
@@ -126,13 +128,24 @@ def combine_modes(file_name):
     newF.close()
     print 'Done combining modalities!'
 
+def one_csv(dir):
+    # mm_files = [pandas.read_csv(os.path.join(dir,f)) for f in os.listdir(dir) if 'multimodal' in f]
+    mm_files = glob.glob(dir + "/*_multimodal.csv")
+    frame = pandas.DataFrame()
+    dfs = []
+    for filename in mm_files:
+        dfs.append(pandas.read_csv(filename))
+    frame = pandas.concat(dfs)
+    frame.to_csv(os.path.join(dir,"ALL_MULTIMODAL.csv"))
+
 
 if __name__ == '__main__':
     dir = sys.argv[1]
     files = os.listdir(dir)
 
     #Extract visual features
-    for f in files:
+    video_files = [f for f in files if f.endswith('.mp4')]
+    for f in video_files:
         extract_visual(os.path.join(dir,f))
         video2audio(os.path.join(dir,f))
 
@@ -140,8 +153,18 @@ if __name__ == '__main__':
     extract_audio(dir)
 
     #Speech to text and extract ling features
-    audio_files = [f for f in files if f.endswith('.wav')]
+    audio_files = [f for f in os.listdir(dir) if f.endswith('.wav')]
     for f in audio_files:
         speech2text(os.path.join(dir,f),'en-US')
+
+    #Extract linguistic features from transcripts
+    transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
+    for f in transcript_files:
         LingAnalysis.run(os.path.join(dir,f.replace('.wav','_transcript.json')))
-        combine_modes(os.path.join(dir,f.replace('.wav','.mp4'))) #Combine modalities
+
+    #Combine features from all three modalities
+    for f in video_files:
+        combine_modes(os.path.join(dir,f))
+
+    #Combine all multimodal csvs into one csv
+    one_csv(dir)
