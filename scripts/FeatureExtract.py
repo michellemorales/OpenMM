@@ -138,6 +138,20 @@ def one_csv(dir):
     frame = pandas.concat(dfs)
     frame.to_csv(os.path.join(dir,"ALL_MULTIMODAL.csv"))
 
+def json2txt(json_file):
+    file = open(json_file,'r')
+    data = json.load(file)
+    transcription = []
+    for utterance in data["results"]:
+        if "alternatives" not in utterance: raise UnknownValueError()
+        for hypothesis in utterance["alternatives"]:
+            if "transcript" in hypothesis:
+                transcription.append(hypothesis["transcript"])
+    newF = open(json_file.replace('.json','.txt'),'w')
+    for line in transcription:
+        newF.write(line.encode('ascii','ignore'))
+    newF.close()
+    print "Done converting json to txt - %s!"%json
 
 if __name__ == '__main__':
     dir = sys.argv[1]
@@ -145,17 +159,17 @@ if __name__ == '__main__':
 
     #Extract visual features
     video_files = [f for f in files if f.endswith('.mp4')]
-    # for f in video_files:
-    #     extract_visual(os.path.join(dir,f))
-    #     video2audio(os.path.join(dir,f))
+    for f in video_files:
+        extract_visual(os.path.join(dir,f))
+        video2audio(os.path.join(dir,f))
 
     # #Extract audio features
-    # extract_audio(dir)
+    extract_audio(dir)
 
-    # #Speech to text and extract ling features
-    # audio_files = [f for f in os.listdir(dir) if f.endswith('.wav')]
-    # for f in audio_files:
-    #     speech2text(os.path.join(dir,f),'es-ES')
+    #Speech to text and extract ling features
+    audio_files = [f for f in os.listdir(dir) if f.endswith('.wav')]
+    for f in audio_files:
+        speech2text(os.path.join(dir,f),'es-ES')
 
     #Extract linguistic features from transcripts
     # transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
@@ -166,10 +180,16 @@ if __name__ == '__main__':
     transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
     bag = LingAnalysis_NonEnglish.bag_of_words(dir)
     for f in transcript_files:
-        LingAnalysis_NonEnglish.get_feats(os.path.join(dir,f),bag)
+        LingAnalysis_NonEnglish.get_feats(os.path.join(dir,f),bag,'German')
+
     #Combine features from all three modalities
     for f in video_files:
         combine_modes(os.path.join(dir,f))
 
     #Combine all multimodal csvs into one csv
     one_csv(dir)
+
+    #Convert json to txt files
+    # transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
+    # for f in transcript_files:
+    #     json2txt(os.path.join(dir,f))
