@@ -29,7 +29,6 @@ def parse(transcript):
     except:
         output = False
     return output
-
 def dependency_distance(conll_df):
     """ Computes dependency distance for dependency tree. Based off of:
     Pakhomov, Serguei, et al. "Computerized assessment of syntactic complexity
@@ -41,7 +40,7 @@ def dependency_distance(conll_df):
     total_distance = sum(diff)
     return total_distance
 def load_tags():
-    with open('/Users/morales/GitHub/Dissertation/data/PennTreebankTagList.txt','r') as f:
+    with open('/Users/morales/GitHub/OpenMM/data/PennTreebankTagList.txt','r') as f:
         tags = [line.strip().split()[1] for line in f.readlines()]
     return tags
 
@@ -107,7 +106,7 @@ def get_liwc(transcript):
         categories = []
         liwcD = {}
         catsD = {}
-        liwc_file = '/Users/morales/GitHub/Dissertation/data/LIWC2015_English.dic'
+        liwc_file = '/Users/morales/GitHub/OpenMM/data/LIWC2015_English.dic'
         read = open(liwc_file,'r').readlines()
         header = read[1:74]
         for line in header:
@@ -157,7 +156,7 @@ def run(file_name):
             if "transcript" in hypothesis:
                 transcription.append(hypothesis["transcript"])
 
-    model = word2vec.Word2Vec.load('/Users/morales/GitHub/Dissertation/data/fisher-vectors-100dim-check20iter')
+    model = word2vec.Word2Vec.load('/Users/morales/GitHub/OpenMM/data/fisher-vectors-100dim-check20iter')
     liwc_cats, liwc_feats = get_liwc(' ')
     tags = load_tags()
     openF = open(file_name.replace('_transcript.json','_ling.csv'),'w')
