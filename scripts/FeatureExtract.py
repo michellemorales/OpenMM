@@ -25,7 +25,7 @@
 # ffmpeg
 # Matlab
 
-import sys, os, subprocess,json, LingAnalysis, pandas, scipy.stats, os.path, glob
+import sys, os, subprocess,json, LingAnalysis, LingAnalysis_NonEnglish, pandas, scipy.stats, os.path, glob
 import speech_recognition as sr
 import numpy as np
 
@@ -77,7 +77,7 @@ def speech2text(audio_file,lang):
         audio = r.record(source)
     #Recognize speech using IBM Speech to Text
     try:
-        result = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD, language='en-US',show_all=True,timestamps=True)
+        result = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD, language=lang,show_all=True,timestamps=True)
         new_f = open(json_name,"w") #create a file to write json object to
         json.dump(result, new_f)
         new_f.close()
@@ -94,7 +94,7 @@ def combine_modes(file_name):
     audioF = file_name.replace('.mp4','_covarep.csv')
     lingF = file_name.replace('.mp4','_ling.csv')
     mmF = file_name.replace('.mp4','_multimodal.csv')
-    print visualF, audioF, lingF, '\n\n\n\n\n\n'
+    print visualF, audioF, lingF, '\n\n'
     files = [visualF,audioF,lingF]
     stats_names = ['max','min','mean','median','std','var','kurt','skew','percentile25','percentile50','percentile75']
     mm_feats = []
@@ -145,23 +145,28 @@ if __name__ == '__main__':
 
     #Extract visual features
     video_files = [f for f in files if f.endswith('.mp4')]
-    for f in video_files:
-        extract_visual(os.path.join(dir,f))
-        video2audio(os.path.join(dir,f))
+    # for f in video_files:
+    #     extract_visual(os.path.join(dir,f))
+    #     video2audio(os.path.join(dir,f))
 
-    #Extract audio features
-    extract_audio(dir)
+    # #Extract audio features
+    # extract_audio(dir)
 
-    #Speech to text and extract ling features
-    audio_files = [f for f in os.listdir(dir) if f.endswith('.wav')]
-    for f in audio_files:
-        speech2text(os.path.join(dir,f),'en-US')
+    # #Speech to text and extract ling features
+    # audio_files = [f for f in os.listdir(dir) if f.endswith('.wav')]
+    # for f in audio_files:
+    #     speech2text(os.path.join(dir,f),'es-ES')
 
     #Extract linguistic features from transcripts
-    transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
-    for f in transcript_files:
-        LingAnalysis.run(os.path.join(dir,f.replace('.wav','_transcript.json')))
+    # transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
+    # for f in transcript_files:
+    #     LingAnalysis.run(os.path.join(dir,f))
 
+    #Extract linguistic features from non-english transcripts
+    transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
+    bag = LingAnalysis_NonEnglish.bag_of_words(dir)
+    for f in transcript_files:
+        LingAnalysis_NonEnglish.get_feats(os.path.join(dir,f),bag)
     #Combine features from all three modalities
     for f in video_files:
         combine_modes(os.path.join(dir,f))
