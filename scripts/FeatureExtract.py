@@ -56,12 +56,17 @@ def extract_audio(audio_dir):
 
 def google_speech2text(audio_file,lang):
     GOOGLE_SPEECH_RECOGNITION_API_KEY = 'AIzaSyCQNG-Jeageo_myq7MJTBzoxAdSq8oqASc'
+    json_name = audio_file.replace(".wav","_transcript.json")
     r = sr.Recognizer()
     with sr.AudioFile(audio_file) as source:
         audio = r.record(source)
     #Recognize speech using Google Speech Recognition
     try:
-        print("Google Speech Recognition thinks you said " + r.recognize_google(audio, key=GOOGLE_SPEECH_RECOGNITION_API_KEY, language=lang))
+        result = r.recognize_google(audio, key=GOOGLE_SPEECH_RECOGNITION_API_KEY, language=lang)
+        new_f = open(json_name,"w") #create a file to write json object to
+        json.dump(result, new_f)
+        new_f.close()
+        print("Audio file processed transcript saved json file!")
     except sr.UnknownValueError:
         print("Google Speech Recognition could not understand audio")
     except sr.RequestError as e:
@@ -90,10 +95,10 @@ def speech2text(audio_file,lang):
 
 def combine_modes(file_name):
     print file_name
-    visualF = file_name.replace('.mp4','_openface.csv')
-    audioF = file_name.replace('.mp4','_covarep.csv')
-    lingF = file_name.replace('.mp4','_ling.csv')
-    mmF = file_name.replace('.mp4','_multimodal.csv')
+    visualF = file_name.replace('_transcript.json','_openface.csv')
+    audioF = file_name.replace('_transcript.json','_covarep.csv')
+    lingF = file_name.replace('_transcript.json','_ling.csv')
+    mmF = file_name.replace('_transcript.json','_multimodal.csv')
     print visualF, audioF, lingF, '\n\n'
     files = [visualF,audioF,lingF]
     stats_names = ['max','min','mean','median','std','var','kurt','skew','percentile25','percentile50','percentile75']
@@ -155,35 +160,51 @@ def json2txt(json_file):
 
 if __name__ == '__main__':
     dir = sys.argv[1]
+    lang = sys.argv[2]
     files = os.listdir(dir)
 
     #Extract visual features
-    video_files = [f for f in files if f.endswith('.mp4')]
-    for f in video_files:
-        extract_visual(os.path.join(dir,f))
-        video2audio(os.path.join(dir,f))
+    # video_files = [f for f in files if f.endswith('.mp4')]
+    # for f in video_files:
+    #     extract_visual(os.path.join(dir,f))
+    #     video2audio(os.path.join(dir,f))
 
     # #Extract audio features
-    extract_audio(dir)
+    # extract_audio(dir)
 
-    #Speech to text and extract ling features
-    audio_files = [f for f in os.listdir(dir) if f.endswith('.wav')]
-    for f in audio_files:
-        speech2text(os.path.join(dir,f),'es-ES')
+    #Speech to text
+    # audio_files = [f for f in os.listdir(dir) if f.endswith('.wav')]
+    # for f in audio_files:
+    #     if lang =='english':
+    #         speech2text(os.path.join(dir,f),'en-US')
+    #     elif lang =='german':
+    #         google_speech2text(os.path.join(dir,f),'de-DE')
+    #     elif lang =='spanish':
+    #         speech2text(os.path.join(dir,f),'es-ES')
 
-    #Extract linguistic features from transcripts
-    # transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
-    # for f in transcript_files:
-    #     LingAnalysis.run(os.path.join(dir,f))
-
-    #Extract linguistic features from non-english transcripts
-    transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
-    bag = LingAnalysis_NonEnglish.bag_of_words(dir)
-    for f in transcript_files:
-        LingAnalysis_NonEnglish.get_feats(os.path.join(dir,f),bag,'German')
+    #Extract ling features
+    # audio_files = [f for f in os.listdir(dir) if f.endswith('.wav')]
+    # for f in audio_files:
+    #     if lang =='english':
+    #         transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
+    #         bag = LingAnalysis_NonEnglish.bag_of_words(dir,'english')
+    #         for f in transcript_files:
+    #             LingAnalysis_NonEnglish.get_feats(os.path.join(dir,f),bag,'english')
+    #
+    #     elif lang =='german':
+    #         transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
+    #         bag = LingAnalysis_NonEnglish.bag_of_words(dir,'german')
+    #         for f in transcript_files:
+    #             LingAnalysis_NonEnglish.get_feats(os.path.join(dir,f),bag,'german')
+    #
+    #     elif lang =='spanish':
+    #         bag = LingAnalysis_NonEnglish.bag_of_words(dir,'spanish')
+    #         for f in transcript_files:
+    #             LingAnalysis_NonEnglish.get_feats(os.path.join(dir,f),bag,'spanish')
 
     #Combine features from all three modalities
-    for f in video_files:
+    transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
+    for f in transcript_files:
         combine_modes(os.path.join(dir,f))
 
     #Combine all multimodal csvs into one csv
