@@ -6,20 +6,30 @@ from collections import defaultdict
 from gensim.models import word2vec
 import sys, re, pandas, numpy, os, subprocess, json, os.path
 
-def bag_of_words(dir):
+def bag_of_words(dir,lang):
     files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
     all_words = []
-    for file_name in files:
-        with open(os.path.join(dir,file_name)) as data_file:
-            data = json.load(data_file)
-        for utterance in data["results"]:
-            if "alternatives" not in utterance: raise UnknownValueError()
-            for hypothesis in utterance["alternatives"]:
-                if "transcript" in hypothesis:
-                    transcript = hypothesis["transcript"]
-                    words = transcript.strip().split()
+    if lang == 'spanish' or lang == 'english':
+        for file_name in files:
+            with open(os.path.join(dir,file_name)) as data_file:
+                data = json.load(data_file)
+            for utterance in data["results"]:
+                if "alternatives" not in utterance: raise UnknownValueError()
+                for hypothesis in utterance["alternatives"]:
+                    if "transcript" in hypothesis:
+                        transcript = hypothesis["transcript"]
+                        words = transcript.strip().split()
+                        for w in words:
+                            all_words.append(w)
+    elif lang == 'german':
+        for file_name in files:
+            with open(os.path.join(dir,file_name),'r') as data_file:
+                transcription = data_file.readlines()
+                for sentence in transcription:
+                    words = sentence.strip().split()
                     for w in words:
                         all_words.append(w)
+
     bag = []
     for w in all_words:
         count = all_words.count(w)
@@ -27,7 +37,14 @@ def bag_of_words(dir):
             bag.append(w)
     bag = sorted(bag)
     return bag
-
+def english_parse(transcript):
+    os.chdir(r"/Users/morales/Github/models/syntaxnet")
+    command = "echo '%s' | syntaxnet/demo.sh" %transcript
+    try:
+        output = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
+    except:
+        output = False
+    return output
 def spanish_parse(transcript):
     os.chdir(r"/Users/morales/Github/models/syntaxnet")
     command = "echo '%s' | syntaxnet/models/parsey_universal/parse.sh /Users/morales/GitHub/models/Spanish" %transcript
@@ -68,14 +85,19 @@ def tag_count(df):
         tag_count.append(count)
     return tag_count
 def get_feats(file_name, bag, lang):
-    with open(os.path.join(dir,file_name)) as data_file:
-        data = json.load(data_file)
-    transcription = []
-    for utterance in data["results"]:
-        if "alternatives" not in utterance: raise UnknownValueError()
-        for hypothesis in utterance["alternatives"]:
-            if "transcript" in hypothesis:
-                transcription.append(hypothesis["transcript"])
+    if lang == 'german':
+        with open(os.path.join(dir,file_name),'r') as data_file:
+            transcription = data_file.readlines()
+
+    elif lang == 'spanish' or lang == 'english':
+        with open(os.path.join(dir,file_name)) as data_file:
+            data = json.load(data_file)
+        transcription = []
+        for utterance in data["results"]:
+            if "alternatives" not in utterance: raise UnknownValueError()
+            for hypothesis in utterance["alternatives"]:
+                if "transcript" in hypothesis:
+                    transcription.append(hypothesis["transcript"])
 
     openF = open(file_name.replace('_transcript.json','_ling.csv'),'w')
     bag_header = ','.join(bag).encode('ascii','ignore')
@@ -91,10 +113,12 @@ def get_feats(file_name, bag, lang):
             for w in bag:
                 count = words.count(w)
                 feats.append(float(count)/word_count)
-            if lang =='German':
+            if lang =='german':
                 conll = german_parse(sentence)
-            elif lang == 'Spanish':
+            elif lang == 'spanish':
                 conll = spanish_parse(sentence)
+            elif lang == 'english':
+                conll = english_parse(sentence)
             if conll:
                 conll_lines = conll.strip().split('\n')
                 conll_table = [line.split('\t') for line in conll_lines]
