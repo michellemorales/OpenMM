@@ -73,7 +73,7 @@ def dependency_distance(conll_df):
     return total_distance
 def load_tags():
     #Load universal POS tag set - http://universaldependencies.org/u/pos/all.html
-    with open('/Users/morales/GitHub/OpenMM/data/UniversalPOSTagList.txt','r') as f:
+    with open('~/OpenMM/data/UniversalPOSTagList.txt','r') as f:
         tags = [line.strip() for line in f.readlines()]
     return tags
 def tag_count(df):
