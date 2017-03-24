@@ -1,0 +1,7 @@
+COVAREP_feature_extractionInitialize
+COVAREP_feature_extractionInitializeWithHandlers
+COVAREP_feature_extractionTerminate
+COVAREP_feature_extractionPrintStackTrace
+mlxCOVAREP_feature_extraction
+mlfCOVAREP_feature_extraction
+
