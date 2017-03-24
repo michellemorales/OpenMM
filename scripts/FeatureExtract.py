@@ -49,7 +49,9 @@ def video2audio(video):
 def extract_audio(audio_dir):
     #covarep operates on directory of files
     #Extracts audio features using COVAREP, requires the Covarep repo and matlab
-    command = '/Applications/MATLAB_R2016a.app/bin/matlab -nodisplay -nosplash -nodesktop -r '+ '"COVAREP_feature_extraction(%s);exit"'%("'"+audio_dir+"'")
+    deployedMCRroot = '/Applications/MATLAB/MATLAB_Runtime/v92/'
+    # command = '/Applications/MATLAB_R2016a.app/bin/matlab -nodisplay -nosplash -nodesktop -r '+ '"COVAREP_feature_extraction(%s);exit"'%("'"+audio_dir+"'")
+    command = './covarep/run_COVAREP_feature_extraction.sh %s %s'%(deployedMCRroot, audio_dir)
     print command
     subprocess.call(command, shell=True)
     print 'DONE! Audio features saved to .mat file in %s directory.' %audio_dir
@@ -170,7 +172,7 @@ if __name__ == '__main__':
     #     video2audio(os.path.join(dir,f))
 
     # #Extract audio features
-    # extract_audio(dir)
+    extract_audio(dir)
 
     #Speech to text
     # audio_files = [f for f in os.listdir(dir) if f.endswith('.wav')]
@@ -203,12 +205,12 @@ if __name__ == '__main__':
     #             LingAnalysis_NonEnglish.get_feats(os.path.join(dir,f),bag,'spanish')
 
     #Combine features from all three modalities
-    transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
-    for f in transcript_files:
-        combine_modes(os.path.join(dir,f))
+    # transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
+    # for f in transcript_files:
+    #     combine_modes(os.path.join(dir,f))
 
     #Combine all multimodal csvs into one csv
-    one_csv(dir)
+    # one_csv(dir)
 
     #Convert json to txt files
     # transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]

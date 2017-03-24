@@ -1,6 +1,6 @@
 #Dependencies
 ffmpeg
-/Applications/MATLAB_R2016a.app/bin/matlab
+deployedMCRroot = /Applications/MATLAB/MATLAB_Runtime/v92/
 
 #Python modules
 sys

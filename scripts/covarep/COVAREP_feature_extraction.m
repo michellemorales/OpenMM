@@ -42,7 +42,6 @@
 % Author
 %  John Kane <kanejo@.tcd.ie>
 
-
 function COVAREP_feature_extraction(in_dir,sample_rate)
 
 %% Initial settings
