@@ -1,0 +1,6 @@
+[submodule "OpenFace"]
+	path = OpenFace
+	url = https://github.com/TadasBaltrusaitis/OpenFace.git
+[submodule "submodules/OpenFace"]
+	path = submodules/OpenFace
+	url = https://github.com/TadasBaltrusaitis/OpenFace.git
