@@ -35,7 +35,7 @@ def extract_visual(video):
     csv = video.replace('.mp4','_openface.csv')
     newF = open(csv,'w')
     print 'Launching OpenFace to extract visual features... \n\n\n\n\n'
-    command = '/Users/morales/GitHub/OpenFace/bin/FeatureExtraction -f %s -of %s'%(video, csv)
+    command = '../submodules/OpenFace/bin/FeatureExtraction -f %s -of %s'%(video, csv)
     subprocess.call(command, shell=True)
     print 'DONE! Visual features saved to %s' %csv
 
@@ -75,6 +75,7 @@ def google_speech2text(audio_file,lang):
         print("Could not request results from Google Speech Recognition service; {0}".format(e))
 
 def speech2text(audio_file,lang):
+    #change from json to txt
     IBM_USERNAME = "28e8d133-29a7-477e-9544-d3ac977218ab"
     IBM_PASSWORD = "JPyxiE3a4ADK"
     json_name = audio_file.replace(".wav","_transcript.json")
@@ -166,13 +167,13 @@ if __name__ == '__main__':
     files = os.listdir(dir)
 
     #Extract visual features
-    # video_files = [f for f in files if f.endswith('.mp4')]
-    # for f in video_files:
-    #     extract_visual(os.path.join(dir,f))
+    video_files = [f for f in files if f.endswith('.mp4')]
+    for f in video_files:
+        extract_visual(os.path.join(dir,f))
     #     video2audio(os.path.join(dir,f))
 
     # #Extract audio features
-    extract_audio(dir)
+    # extract_audio(dir)
 
     #Speech to text
     # audio_files = [f for f in os.listdir(dir) if f.endswith('.wav')]
