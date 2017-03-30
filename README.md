@@ -5,8 +5,6 @@ OpenMM is an open-source tool that can perform multimodal feature extraction. In
 
 ![alt tag](https://github.com/michellemorales/OpenMM/blob/master/images/PipelineVersion3.jpeg)
 
-## How to Use This Library
-
 ## Installation
 Please see the Wiki for installation instructions.
 
