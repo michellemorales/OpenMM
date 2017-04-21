@@ -3,7 +3,6 @@
 
 from __future__ import division
 from collections import defaultdict
-from gensim.models import word2vec
 import sys, re, pandas, numpy, os, subprocess, json, os.path
 
 def bag_of_words(dir,lang):
