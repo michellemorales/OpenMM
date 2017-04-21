@@ -1,6 +1,6 @@
-deployedMCRroot = /Applications/MATLAB/MATLAB_Runtime/v92/
-openface = /Users/morales/GitHub/OpenFace/bin/FeatureExtraction
-syntaxnet = /Users/morales/Github/models/syntaxnet
-GOOGLE_SPEECH_RECOGNITION_API_KEY = 'AIzaSyCQNG-Jeageo_myq7MJTBzoxAdSq8oqASc'
-IBM_USERNAME = "28e8d133-29a7-477e-9544-d3ac977218ab"
-IBM_PASSWORD = "JPyxiE3a4ADK"
+deployedMCRroot = 
+openface = 
+syntaxnet = 
+GOOGLE_SPEECH_RECOGNITION_API_KEY = 
+IBM_USERNAME = 
+IBM_PASSWORD = 
