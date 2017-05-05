@@ -1,6 +1,0 @@
-deployedMCRroot = 
-openface = 
-syntaxnet = 
-GOOGLE_SPEECH_RECOGNITION_API_KEY = 
-IBM_USERNAME = 
-IBM_PASSWORD = 

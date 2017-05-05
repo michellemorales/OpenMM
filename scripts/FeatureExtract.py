@@ -25,47 +25,46 @@
 # ffmpeg
 # Matlab
 
-import sys, os, subprocess,json, LingAnalysis, LingAnalysis_NonEnglish, pandas, scipy.stats, os.path, glob
+import sys, os, subprocess, json, LingAnalysis, pandas, scipy.stats, os.path, glob
 import speech_recognition as sr
 import numpy as np
 
-def extract_visual(video):
-    #Extracts visual features using OpenFace, requires the OpenFace () repo to be installed
-    pathOpenFace =''
+
+def extract_visual(video, openface):
+    # Extracts visual features using OpenFace, requires the OpenFace () repo to be installed
     csv = video.replace('.mp4','_openface.csv')
-    newF = open(csv,'w')
     print 'Launching OpenFace to extract visual features... \n\n\n\n\n'
-    command = '../submodules/OpenFace/bin/FeatureExtraction -f %s -of %s'%(video, csv)
+    command = '%s -f %s -of %s'%(openface, video, csv)
     subprocess.call(command, shell=True)
-    print 'DONE! Visual features saved to %s' %csv
+    print 'DONE! Visual features saved to %s' % csv
+
 
 def video2audio(video):
-    #Converts video to audio using ffmpeg, requires ffmpeg to be installed
-    wav = video.replace('.mp4','.wav')
+    # Converts video to audio using ffmpeg, requires ffmpeg to be installed
+    wav = video.replace('.mp4', '.wav')
     command = 'ffmpeg -i %s -acodec pcm_s16le -ac 1 -ar 16000 %s'%(video, wav)
     subprocess.call(command, shell=True)
-    print 'DONE! Video converted to audio file: %s'%wav
+    print 'DONE! Video converted to audio file: %s' % wav
 
-def extract_audio(audio_dir):
-    #covarep operates on directory of files
-    #Extracts audio features using COVAREP, requires the Covarep repo and matlab
-    deployedMCRroot = '/Applications/MATLAB/MATLAB_Runtime/v92/'
-    # command = '/Applications/MATLAB_R2016a.app/bin/matlab -nodisplay -nosplash -nodesktop -r '+ '"COVAREP_feature_extraction(%s);exit"'%("'"+audio_dir+"'")
-    command = './covarep/run_COVAREP_feature_extraction.sh %s %s'%(deployedMCRroot, audio_dir)
+
+def extract_audio(audio_dir, matlab):
+    # Covarep operates on directory of files and extracts audio features using matlab app
+    matlab = '/Applications/MATLAB/MATLAB_Runtime/v92/'
+    command = "./covarep/run_COVAREP_feature_extraction.sh '%s' '%s'" % (matlab, audio_dir)
     print command
     subprocess.call(command, shell=True)
-    print 'DONE! Audio features saved to .mat file in %s directory.' %audio_dir
+    print 'DONE! Audio features saved to .mat file in %s directory.' % audio_dir
 
-def google_speech2text(audio_file,lang):
-    GOOGLE_SPEECH_RECOGNITION_API_KEY = 'AIzaSyCQNG-Jeageo_myq7MJTBzoxAdSq8oqASc'
-    json_name = audio_file.replace(".wav","_transcript.json")
+
+def google_speech2text(audio_file, lang, google_key):
+    json_name = audio_file.replace(".wav", "_transcript.json")
     r = sr.Recognizer()
     with sr.AudioFile(audio_file) as source:
         audio = r.record(source)
-    #Recognize speech using Google Speech Recognition
+    # Recognize speech using Google Speech Recognition
     try:
-        result = r.recognize_google(audio, key=GOOGLE_SPEECH_RECOGNITION_API_KEY, language=lang)
-        new_f = open(json_name,"w") #create a file to write json object to
+        result = r.recognize_google(audio, key=google_key, language=lang)
+        new_f = open(json_name,"w")
         json.dump(result, new_f)
         new_f.close()
         print("Audio file processed transcript saved json file!")
@@ -74,22 +73,20 @@ def google_speech2text(audio_file,lang):
     except sr.RequestError as e:
         print("Could not request results from Google Speech Recognition service; {0}".format(e))
 
-def speech2text(audio_file,lang):
-    #change from json to txt
-    IBM_USERNAME = "28e8d133-29a7-477e-9544-d3ac977218ab"
-    IBM_PASSWORD = "JPyxiE3a4ADK"
-    json_name = audio_file.replace(".wav","_transcript.json")
+
+def ibm_speech2text(audio_file, lang, IBM_USERNAME, IBM_PASSWORD):
+    transcript_name = audio_file.replace(".wav", "_transcript.txt")
     r = sr.Recognizer()
 
     with sr.AudioFile(audio_file) as source:
         audio = r.record(source)
-    #Recognize speech using IBM Speech to Text
+    # Recognize speech using IBM Speech to Text
     try:
-        result = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD, language=lang,show_all=True,timestamps=True)
-        new_f = open(json_name,"w") #create a file to write json object to
-        json.dump(result, new_f)
+        result = r.recognize_ibm(audio, username=IBM_USERNAME, password=IBM_PASSWORD, language=lang)
+        new_f = open(transcript_name, "w")
+        new_f.write(result)
         new_f.close()
-        print("Audio file processed transcript saved json file!")
+        print("Audio file processed transcript saved file!")
 
     except sr.UnknownValueError:
         print("IBM Speech to Text could not understand audio")
@@ -136,6 +133,7 @@ def combine_modes(file_name):
     newF.close()
     print 'Done combining modalities!'
 
+
 def one_csv(dir):
     # mm_files = [pandas.read_csv(os.path.join(dir,f)) for f in os.listdir(dir) if 'multimodal' in f]
     mm_files = glob.glob(dir + "/*_multimodal.csv")
@@ -145,6 +143,7 @@ def one_csv(dir):
         dfs.append(pandas.read_csv(filename))
     frame = pandas.concat(dfs)
     frame.to_csv(os.path.join(dir,"ALL_MULTIMODAL.csv"))
+
 
 def json2txt(json_file):
     file = open(json_file,'r')
@@ -162,58 +161,70 @@ def json2txt(json_file):
     print "Done converting json to txt - %s!"%json
 
 if __name__ == '__main__':
-    dir = sys.argv[1]
+    my_dir = sys.argv[1]
     lang = sys.argv[2]
-    files = os.listdir(dir)
 
-    #Extract visual features
-    video_files = [f for f in files if f.endswith('.mp4')]
-    for f in video_files:
-        extract_visual(os.path.join(dir,f))
-    #     video2audio(os.path.join(dir,f))
+    # Get parameters from config file
+    config = sys.argv[3]
+    json_file = open(config, "r").read()
+    pars = json.loads(json_file)
 
-    # #Extract audio features
-    # extract_audio(dir)
+    # Get video files from directory
+    files = os.listdir(my_dir)
 
-    #Speech to text
-    # audio_files = [f for f in os.listdir(dir) if f.endswith('.wav')]
-    # for f in audio_files:
-    #     if lang =='english':
-    #         speech2text(os.path.join(dir,f),'en-US')
-    #     elif lang =='german':
-    #         google_speech2text(os.path.join(dir,f),'de-DE')
-    #     elif lang =='spanish':
-    #         speech2text(os.path.join(dir,f),'es-ES')
-
-    #Extract ling features
-    # audio_files = [f for f in os.listdir(dir) if f.endswith('.wav')]
-    # for f in audio_files:
-    #     if lang =='english':
-    #         transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
-    #         bag = LingAnalysis_NonEnglish.bag_of_words(dir,'english')
-    #         for f in transcript_files:
-    #             LingAnalysis_NonEnglish.get_feats(os.path.join(dir,f),bag,'english')
+    # VIDEO
+    # First, check that the video is the right .mp4 format
+    # video_files = [f for f in files if f.endswith('.mp4')]
+    # openface = pars["OPENFACE"]
+    # for f in video_files:
+    #     extract_visual(os.path.join(my_dir, f), openface)
+    #     video2audio(os.path.join(my_dir, f))
     #
-    #     elif lang =='german':
-    #         transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
-    #         bag = LingAnalysis_NonEnglish.bag_of_words(dir,'german')
-    #         for f in transcript_files:
-    #             LingAnalysis_NonEnglish.get_feats(os.path.join(dir,f),bag,'german')
+    # # AUDIO
+    # # Point to matlab runtime application
+    # matlab = pars["MATLAB_RUNTIME"]
+    # extract_audio(my_dir, matlab)
     #
-    #     elif lang =='spanish':
-    #         bag = LingAnalysis_NonEnglish.bag_of_words(dir,'spanish')
-    #         for f in transcript_files:
-    #             LingAnalysis_NonEnglish.get_feats(os.path.join(dir,f),bag,'spanish')
+    # # SPEECH2TEXT
+    # audio_files = [f for f in os.listdir(my_dir) if f.endswith('.wav')]
+    # google_key = str(pars['GOOGLE_API_KEY'])
+    # ibm_pass = str(pars["IBM_PASSWORD"])
+    # ibm_un = str(pars["IBM_USERNAME"])
+    # for f in audio_files:
+    #     if lang == 'english':
+    #         ibm_speech2text(os.path.join(my_dir, f), 'en-US', ibm_un, ibm_pass)
+    #     elif lang == 'spanish':
+    #         ibm_speech2text(os.path.join(my_dir, f), 'es-ES', ibm_un, ibm_pass)
+    #     # If language in german use Google's API
+    #     elif lang == 'german':
+    #         google_speech2text(os.path.join(my_dir, f), 'de-DE', google_key)
 
-    #Combine features from all three modalities
+    # LING
+    transcript_files = [f for f in os.listdir(my_dir) if f.endswith('_transcript.txt')]
+    if lang == 'english':
+        bag = LingAnalysis.bag_of_words(my_dir, lang)
+        for tf in transcript_files:
+            LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang)
+
+    elif lang == 'german':
+        bag = LingAnalysis.bag_of_words(my_dir, lang)
+        for tf in transcript_files:
+            LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang)
+
+    elif lang == 'spanish':
+        bag = LingAnalysis.bag_of_words(my_dir, lang)
+        for tf in transcript_files:
+            LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang)
+
+    # Combine features from all three modalities
     # transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
     # for f in transcript_files:
     #     combine_modes(os.path.join(dir,f))
 
-    #Combine all multimodal csvs into one csv
+    # Combine all multimodal csvs into one csv
     # one_csv(dir)
 
-    #Convert json to txt files
+    # Convert json to txt files
     # transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
     # for f in transcript_files:
     #     json2txt(os.path.join(dir,f))
