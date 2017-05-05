@@ -202,9 +202,10 @@ if __name__ == '__main__':
     # LING
     transcript_files = [f for f in os.listdir(my_dir) if f.endswith('_transcript.txt')]
     if lang == 'english':
+        parser_dir = pars["SYNTAXNET_ENGLISH"]
         bag = LingAnalysis.bag_of_words(my_dir, lang)
         for tf in transcript_files:
-            LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang)
+            LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang, parser_dir)
 
     elif lang == 'german':
         bag = LingAnalysis.bag_of_words(my_dir, lang)

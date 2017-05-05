@@ -28,9 +28,9 @@ def bag_of_words(dir, lang):
     return bag
 
 
-def english_parse(transcript):
-    os.chdir(r"/Users/morales/Github/models/syntaxnet")
-    command = "echo '%s' | /syntaxnet/demo.sh" % transcript
+def english_parse(transcript, parser_dir):
+    os.chdir(r"%s" % parser_dir)
+    command = "echo '%s' | syntaxnet/demo.sh" % transcript
     try:
         output = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
     except:
@@ -87,7 +87,7 @@ def tag_count(df):
     return tag_count
 
 
-def get_feats(file_name, bag, lang):
+def get_feats(file_name, bag, lang, parser_dir):
     with open(os.path.join(dir, file_name), 'r') as data_file:
         transcription = data_file.readlines()
 
@@ -110,7 +110,7 @@ def get_feats(file_name, bag, lang):
             elif lang == 'spanish':
                 conll = spanish_parse(sentence)
             elif lang == 'english':
-                conll = english_parse(sentence)
+                conll = english_parse(sentence, parser_dir)
             if conll:
                 conll_lines = conll.strip().split('\n')
                 conll_table = [line.split('\t') for line in conll_lines]
