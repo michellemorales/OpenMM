@@ -4,7 +4,7 @@ OpenMM: An Open-source Multimodal Feature Extraction Tool
 OpenMM is an open-source tool that can perform multimodal feature extraction. In other words, this tool will allow you to easily extract video, audio, and linguistic features all at once. This tool builds upon existing GitHub repos for visual feature extraction [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace) and audio feature extraction [Covarep](https://github.com/covarep/covarep). I integrate these existing repos with my code for linguistic feature extraction (LingAnalysis). OpenMM provides a simple way for researchers to extract multimodal features. The tool only requires a video as input and outputs a csv of multimodal features, audio conversion and speech-to-text are handled internally. My hope is that this will help promote more interest and research in building multimodal systems. 
 
 ![alt tag](https://github.com/michellemorales/OpenMM/blob/master/images/PipelineVersion3.jpeg)
-![](https://github.com/michellemorales/OpenMM/blob/master/OpenMM.gif)
+![alt tag](https://github.com/michellemorales/OpenMM/blob/master/OpenMM.png)
 
 ## Installation
 Please see the Wiki for installation instructions.
