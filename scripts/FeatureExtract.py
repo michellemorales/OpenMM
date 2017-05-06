@@ -1,29 +1,9 @@
-#Michelle Morales
-#Dissertation Work 2017
+# Michelle Morales
+# Dissertation Work 2017
+# OpenMM
 
-#This script can be used to perform AV (audiovisual) feature extraction using the OpenFace and COVAREP repos
+# This script can be used to perform multimodal feature extraction using the OpenFace, Covarep, and LingAnalysis
 
-### OpenFace ###
-#Feature extraction with OpenFace
-#ToDo
-#function that takes video as input
-#creates new csv for output
-#runs feature extraction: OpenFace/bin/FeatureExtraction -f /path/to/mov -of /path/to/.csv
-
-#Extract audio (wav) from video - ffmpeg -i Example.mov -vn -acodec pcm_s16le -ar 44100 -ac 2 Example.wav
-
-### COVAREP ###
-#Feature extraction with covarep
-#ToDo
-#figure out how to call matlab functions in python
-#function that takes audio as input and creates csv and writes features to
-#covarep/feature_extraction/COVAREP_feature_extraction.m
-#/Applications/MATLAB_R2016a.app/bin/matlab -nodisplay -nosplash -nodesktop -r "COVAREP_feature_extraction('/Users/morales/Desktop/');exit"
-
-### Dependencies ###
-# OpenFace
-# ffmpeg
-# Matlab
 
 import sys, os, subprocess, json, LingAnalysis, pandas, scipy.stats, os.path, glob
 import speech_recognition as sr
@@ -93,23 +73,25 @@ def ibm_speech2text(audio_file, lang, IBM_USERNAME, IBM_PASSWORD):
     except sr.RequestError as e:
         print("Could not request results from IBM Speech to Text service; {0}".format(e))
 
-def combine_modes(file_name):
+
+def early_fusion(file_name):
     print file_name
-    visualF = file_name.replace('_transcript.json','_openface.csv')
-    audioF = file_name.replace('_transcript.json','_covarep.csv')
-    lingF = file_name.replace('_transcript.json','_ling.csv')
-    mmF = file_name.replace('_transcript.json','_multimodal.csv')
-    print visualF, audioF, lingF, '\n\n'
-    files = [visualF,audioF,lingF]
-    stats_names = ['max','min','mean','median','std','var','kurt','skew','percentile25','percentile50','percentile75']
+    visual_file = file_name.replace('_transcript.txt', '_openface.csv')
+    audio_file = file_name.replace('_transcript.txt', '_covarep.csv')
+    ling_file = file_name.replace('_transcript.txt', '_ling.csv')
+    mm_file = file_name.replace('_transcript.txt', '_multimodal.csv')
+    print visual_file, audio_file, ling_file, '\n\n'
+    files = [visual_file, audio_file, ling_file]
+    stats_names = ['max', 'min', 'mean', 'median', 'std', 'var', 'kurt', 'skew', 'percentile25', 'percentile50', 'percentile75']
     mm_feats = []
     mm_names = []
-    for f in files:
-        df = pandas.read_csv(f,header='infer')
+    for feat_file in files:
+        df = pandas.read_csv(feat_file, header='infer')
         feature_names = df.columns.values
-        for f in feature_names:
-            vals = df[f].values #Feature vector
-            #Run statistics
+        for feat in feature_names:
+            # Feature vector
+            vals = df[feat].values
+            # Run statistics
             maximum = np.nanmax(vals)
             minimum = np.nanmin(vals)
             mean = np.nanmean(vals)
@@ -120,29 +102,27 @@ def combine_modes(file_name):
             skew = scipy.stats.skew(vals)
             percentile25 = np.nanpercentile(vals,25)
             percentile50 = np.nanpercentile(vals, 50)
-            percentile75 =  np.nanpercentile(vals, 75)
-            names = [f.strip()+"_"+stat for stat in stats_names]
+            percentile75 = np.nanpercentile(vals, 75)
+            names = [feat.strip()+"_"+stat for stat in stats_names]
             feats = [maximum, minimum, mean, median, std, var, kurt, skew, percentile25, percentile50, percentile75]
             for n in names:
                 mm_names.append(n)
             for f in feats:
                 mm_feats.append(f)
-    newF = open(mmF,'w')
-    newF.write(','.join(mm_names)+'\n')
-    newF.write(','.join([str(mm) for mm in mm_feats]))
-    newF.close()
+    new_file = open(mm_file, 'w')
+    new_file.write(','.join(mm_names)+'\n')
+    new_file.write(','.join([str(mm) for mm in mm_feats]))
+    new_file.close()
     print 'Done combining modalities!'
 
 
-def one_csv(dir):
-    # mm_files = [pandas.read_csv(os.path.join(dir,f)) for f in os.listdir(dir) if 'multimodal' in f]
-    mm_files = glob.glob(dir + "/*_multimodal.csv")
-    frame = pandas.DataFrame()
+def one_csv(my_dir):
+    mm_files = glob.glob(my_dir + "/*_multimodal.csv")
     dfs = []
-    for filename in mm_files:
-        dfs.append(pandas.read_csv(filename))
+    for file_name in mm_files:
+        dfs.append(pandas.read_csv(file_name))
     frame = pandas.concat(dfs)
-    frame.to_csv(os.path.join(dir,"ALL_MULTIMODAL.csv"))
+    frame.to_csv(os.path.join(my_dir, "ALL_MULTIMODAL.csv"))
 
 
 def json2txt(json_file):
@@ -163,8 +143,6 @@ def json2txt(json_file):
 if __name__ == '__main__':
     my_dir = sys.argv[1]
     lang = sys.argv[2]
-
-    # Get parameters from config file
     config = sys.argv[3]
     json_file = open(config, "r").read()
     pars = json.loads(json_file)
@@ -201,29 +179,29 @@ if __name__ == '__main__':
 
     # LING
     transcript_files = [f for f in os.listdir(my_dir) if f.endswith('_transcript.txt')]
+    parser_dir = pars["SYNTAXNET"]
     if lang == 'english':
-        parser_dir = pars["SYNTAXNET_ENGLISH"]
-        bag = LingAnalysis.bag_of_words(my_dir, lang)
+        bag = LingAnalysis.bag_of_words(my_dir)
         for tf in transcript_files:
             LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang, parser_dir)
 
     elif lang == 'german':
         bag = LingAnalysis.bag_of_words(my_dir, lang)
         for tf in transcript_files:
-            LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang)
+            LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang, parser_dir)
 
     elif lang == 'spanish':
         bag = LingAnalysis.bag_of_words(my_dir, lang)
         for tf in transcript_files:
-            LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang)
+            LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang, parser_dir)
 
-    # Combine features from all three modalities
-    # transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
-    # for f in transcript_files:
-    #     combine_modes(os.path.join(dir,f))
+    # FUSION
+    transcript_files = [f for f in os.listdir(my_dir) if f.endswith('_transcript.txt')]
+    for f in transcript_files:
+        early_fusion(os.path.join(my_dir, f))
 
-    # Combine all multimodal csvs into one csv
-    # one_csv(dir)
+    # Combine all data instances into one csv
+    one_csv(my_dir)
 
     # Convert json to txt files
     # transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]

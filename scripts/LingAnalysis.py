@@ -3,26 +3,26 @@
 
 from __future__ import division
 from collections import defaultdict
-import sys, re, pandas, numpy, os, subprocess, json, os.path
+import sys, re, pandas, numpy, os, subprocess, json, os.path, string
 
 
-def bag_of_words(dir, lang):
-    files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
+def bag_of_words(dir):
+    files = [f for f in os.listdir(dir) if f.endswith('_transcript.txt')]
     all_words = []
-
     for file_name in files:
         with open(os.path.join(dir, file_name), 'r') as data_file:
             transcription = data_file.readlines()
-            # Remove punctuation
+            # Remove punctuation and lower all characters
             for sentence in transcription:
-                words = sentence.strip().split()
+                sentence = sentence.translate(None, string.punctuation)
+                words = sentence.lower().strip().split()
                 for w in words:
                     all_words.append(w)
 
     bag = []
     for w in all_words:
         count = all_words.count(w)
-        if count > 9 and w not in bag:
+        if count > 1 and w not in bag:
             bag.append(w)
     bag = sorted(bag)
     return bag
@@ -38,8 +38,8 @@ def english_parse(transcript, parser_dir):
     return output
 
 
-def spanish_parse(transcript):
-    os.chdir(r"/Users/morales/Github/models/syntaxnet")
+def spanish_parse(transcript, parser_dir):
+    os.chdir(r"%s" % parser_dir)
     command = "echo '%s' | syntaxnet/models/parsey_universal/parse.sh /Users/morales/GitHub/models/Spanish" % transcript
     try:
         output = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
@@ -48,8 +48,8 @@ def spanish_parse(transcript):
     return output
 
 
-def german_parse(transcript):
-    os.chdir(r"/Users/morales/Github/models/syntaxnet")
+def german_parse(transcript, parser_dir):
+    os.chdir(r"%s" % parser_dir)
     command = "echo '%s' | syntaxnet/models/parsey_universal/parse.sh /Users/morales/GitHub/models/German" % transcript
     try:
         output = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
@@ -72,8 +72,8 @@ def dependency_distance(conll_df):
 
 def load_tags():
     # Load universal POS tag set - http://universaldependencies.org/u/pos/all.html
-    with open('../data/UniversalPOSTagList.txt', 'r') as f:
-        tags = [line.strip() for line in f.readlines()]
+    tags = "ADJ ADP ADV AUX CCONJ DET INTJ NOUN NUM PART PRON PROPN PUNCT SCONJ SYM VERB X".strip().split()
+    print tags
     return tags
 
 
@@ -93,8 +93,12 @@ def get_feats(file_name, bag, lang, parser_dir):
 
     openF = open(file_name.replace('_transcript.txt', '_ling.csv'), 'w')
     bag_header = ','.join(bag).encode('ascii', 'ignore')
+    print bag_header
+    # ToDo : figure out what is wrong with the feature header, why isnt bag of words working?
     syntax_header = 'word_count,avg_wordlen,levels,distance,univ_tag,%s' % (','.join(load_tags()))
-    openF.write(bag_header + ',' + syntax_header + '\n')
+    header = bag_header + ',' + syntax_header + '\n'
+    print header
+    openF.write(header)
     feature_list = []
     for sentence in transcription:
         print sentence
@@ -106,9 +110,9 @@ def get_feats(file_name, bag, lang, parser_dir):
                 count = words.count(w)
                 feats.append(float(count) / word_count)
             if lang == 'german':
-                conll = german_parse(sentence)
+                conll = german_parse(sentence, parser_dir)
             elif lang == 'spanish':
-                conll = spanish_parse(sentence)
+                conll = spanish_parse(sentence, parser_dir)
             elif lang == 'english':
                 conll = english_parse(sentence, parser_dir)
             if conll:

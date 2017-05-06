@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="8ec0812c-e954-4629-af93-798d4202033d" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/FerrisBuellerClip_ling.csv" afterPath="$PROJECT_DIR$/examples/FerrisBuellerClip_ling.csv" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/FeatureExtract.py" afterPath="$PROJECT_DIR$/scripts/FeatureExtract.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/LingAnalysis.py" afterPath="$PROJECT_DIR$/scripts/LingAnalysis.py" />
     </list>
@@ -19,36 +20,54 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="config.json" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/config.json">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" column="20" lean-forward="false" selection-start-line="5" selection-start-column="20" selection-end-line="5" selection-end-column="20" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="FeatureExtract.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="FeatureExtract.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/FeatureExtract.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="174">
-              <caret line="204" column="44" lean-forward="false" selection-start-line="204" selection-start-column="44" selection-end-line="204" selection-end-column="44" />
+            <state relative-caret-position="150">
+              <caret line="10" column="0" lean-forward="true" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
               <folding>
-                <element signature="e#903#985#0" expanded="true" />
-                <element signature="e#3731#5410#0" expanded="false" />
+                <element signature="e#169#251#0" expanded="true" />
+                <element signature="e#346#702#0" expanded="false" />
+                <element signature="e#733#1022#0" expanded="false" />
+                <element signature="e#1067#1440#0" expanded="false" />
+                <element signature="e#1501#2189#0" expanded="false" />
+                <element signature="e#2263#2961#0" expanded="false" />
+                <element signature="e#2997#4788#0" expanded="false" />
+                <element signature="e#4816#5049#0" expanded="false" />
+                <element signature="e#5081#5628#0" expanded="false" />
+                <element signature="e#5661#8138#0" expanded="false" />
+                <element signature="e#7134#7293#0" expanded="false" />
+                <element signature="e#7330#7495#0" expanded="false" />
+                <element signature="e#7533#7704#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LingAnalysis.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="config.json" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/Desktop/config.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="45">
+              <caret line="3" column="12" lean-forward="true" selection-start-line="3" selection-start-column="12" selection-end-line="3" selection-end-column="12" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="LingAnalysis.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/LingAnalysis.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="121">
-              <caret line="36" column="22" lean-forward="true" selection-start-line="36" selection-start-column="22" selection-end-line="36" selection-end-column="22" />
+            <state relative-caret-position="401">
+              <caret line="114" column="58" lean-forward="false" selection-start-line="114" selection-start-column="58" selection-end-line="114" selection-end-column="58" />
               <folding>
                 <element signature="e#91#122#0" expanded="true" />
+                <element signature="e#257#967#0" expanded="false" />
+                <element signature="e#1017#1259#0" expanded="false" />
+                <element signature="e#1309#1613#0" expanded="false" />
+                <element signature="e#1662#1965#0" expanded="false" />
+                <element signature="e#2007#2472#0" expanded="false" />
+                <element signature="e#2496#2713#0" expanded="false" />
+                <element signature="e#2739#2938#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -64,16 +83,16 @@
       <list>
         <option value="$PROJECT_DIR$/scripts/config.json" />
         <option value="$PROJECT_DIR$/scripts/LingAnalysis_NonEnglish.py" />
-        <option value="$PROJECT_DIR$/scripts/FeatureExtract.py" />
         <option value="$PROJECT_DIR$/scripts/LingAnalysis.py" />
+        <option value="$USER_HOME$/Desktop/config.json" />
+        <option value="$PROJECT_DIR$/scripts/FeatureExtract.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="10" />
-    <option name="y" value="43" />
+    <option name="y" value="23" />
     <option name="width" value="1260" />
-    <option name="height" value="733" />
+    <option name="height" value="773" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -90,8 +109,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -120,6 +137,8 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -254,13 +273,13 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="10" y="43" width="1260" height="733" extended-state="1" />
+    <frame x="0" y="23" width="1260" height="773" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3298193" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31107953" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -281,10 +300,59 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager />
+    <breakpoint-manager>
+      <option name="time" value="4" />
+    </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/scripts/config.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/FeatureExtract.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3135">
+          <caret line="209" column="26" lean-forward="true" selection-start-line="209" selection-start-column="26" selection-end-line="209" selection-end-column="26" />
+          <folding>
+            <element signature="e#169#251#0" expanded="true" />
+            <element signature="e#346#702#0" expanded="false" />
+            <element signature="e#733#1022#0" expanded="false" />
+            <element signature="e#1067#1440#0" expanded="false" />
+            <element signature="e#1501#2189#0" expanded="false" />
+            <element signature="e#2263#2961#0" expanded="false" />
+            <element signature="e#2997#4788#0" expanded="false" />
+            <element signature="e#4816#5049#0" expanded="false" />
+            <element signature="e#5081#5628#0" expanded="false" />
+            <element signature="e#5661#8138#0" expanded="false" />
+            <element signature="e#7134#7293#0" expanded="false" />
+            <element signature="e#7330#7495#0" expanded="false" />
+            <element signature="e#7533#7704#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/LingAnalysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="975">
+          <caret line="95" column="93" lean-forward="false" selection-start-line="95" selection-start-column="93" selection-end-line="95" selection-end-column="93" />
+          <folding>
+            <element signature="e#91#122#0" expanded="true" />
+            <element signature="e#257#967#0" expanded="false" />
+            <element signature="e#1017#1259#0" expanded="false" />
+            <element signature="e#1309#1613#0" expanded="false" />
+            <element signature="e#1662#1965#0" expanded="false" />
+            <element signature="e#2007#2472#0" expanded="false" />
+            <element signature="e#2496#2713#0" expanded="false" />
+            <element signature="e#2739#2938#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/config.json">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
@@ -298,8 +366,19 @@
         <state relative-caret-position="570">
           <caret line="38" column="17" lean-forward="true" selection-start-line="38" selection-start-column="17" selection-end-line="38" selection-end-column="17" />
           <folding>
-            <element signature="e#903#985#0" expanded="true" />
-            <element signature="e#3731#5410#0" expanded="false" />
+            <element signature="e#169#251#0" expanded="true" />
+            <element signature="e#346#702#0" expanded="false" />
+            <element signature="e#733#1022#0" expanded="false" />
+            <element signature="e#1067#1440#0" expanded="false" />
+            <element signature="e#1501#2189#0" expanded="false" />
+            <element signature="e#2263#2961#0" expanded="false" />
+            <element signature="e#2997#4788#0" expanded="false" />
+            <element signature="e#4816#5049#0" expanded="false" />
+            <element signature="e#5081#5628#0" expanded="false" />
+            <element signature="e#5661#8138#0" expanded="false" />
+            <element signature="e#7134#7293#0" expanded="false" />
+            <element signature="e#7330#7495#0" expanded="false" />
+            <element signature="e#7533#7704#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -310,15 +389,14 @@
           <caret line="5" column="60" lean-forward="false" selection-start-line="5" selection-start-column="60" selection-end-line="5" selection-end-column="60" />
           <folding>
             <element signature="e#91#122#0" expanded="true" />
+            <element signature="e#257#967#0" expanded="false" />
+            <element signature="e#1017#1259#0" expanded="false" />
+            <element signature="e#1309#1613#0" expanded="false" />
+            <element signature="e#1662#1965#0" expanded="false" />
+            <element signature="e#2007#2472#0" expanded="false" />
+            <element signature="e#2496#2713#0" expanded="false" />
+            <element signature="e#2739#2938#0" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/config.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="20" lean-forward="false" selection-start-line="5" selection-start-column="20" selection-end-line="5" selection-end-column="20" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -336,23 +414,64 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/FeatureExtract.py">
+    <entry file="file:///anaconda/lib/python3.6/importlib/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="174">
-          <caret line="204" column="44" lean-forward="false" selection-start-line="204" selection-start-column="44" selection-end-line="204" selection-end-column="44" />
-          <folding>
-            <element signature="e#903#985#0" expanded="true" />
-            <element signature="e#3731#5410#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="150">
+          <caret line="10" column="19" lean-forward="true" selection-start-line="10" selection-start-column="19" selection-end-line="10" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/config.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="20" lean-forward="false" selection-start-line="5" selection-start-column="20" selection-end-line="5" selection-end-column="20" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/LingAnalysis.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="121">
-          <caret line="36" column="22" lean-forward="true" selection-start-line="36" selection-start-column="22" selection-end-line="36" selection-end-column="22" />
+        <state relative-caret-position="401">
+          <caret line="114" column="58" lean-forward="false" selection-start-line="114" selection-start-column="58" selection-end-line="114" selection-end-column="58" />
           <folding>
             <element signature="e#91#122#0" expanded="true" />
+            <element signature="e#257#967#0" expanded="false" />
+            <element signature="e#1017#1259#0" expanded="false" />
+            <element signature="e#1309#1613#0" expanded="false" />
+            <element signature="e#1662#1965#0" expanded="false" />
+            <element signature="e#2007#2472#0" expanded="false" />
+            <element signature="e#2496#2713#0" expanded="false" />
+            <element signature="e#2739#2938#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Desktop/config.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="12" lean-forward="true" selection-start-line="3" selection-start-column="12" selection-end-line="3" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/FeatureExtract.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="0" lean-forward="true" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <folding>
+            <element signature="e#169#251#0" expanded="true" />
+            <element signature="e#346#702#0" expanded="false" />
+            <element signature="e#733#1022#0" expanded="false" />
+            <element signature="e#1067#1440#0" expanded="false" />
+            <element signature="e#1501#2189#0" expanded="false" />
+            <element signature="e#2263#2961#0" expanded="false" />
+            <element signature="e#2997#4788#0" expanded="false" />
+            <element signature="e#4816#5049#0" expanded="false" />
+            <element signature="e#5081#5628#0" expanded="false" />
+            <element signature="e#5661#8138#0" expanded="false" />
+            <element signature="e#7134#7293#0" expanded="false" />
+            <element signature="e#7330#7495#0" expanded="false" />
+            <element signature="e#7533#7704#0" expanded="false" />
           </folding>
         </state>
       </provider>
