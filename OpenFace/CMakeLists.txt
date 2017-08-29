@@ -9,7 +9,7 @@ set(CMAKE_CONFIG_DIR etc/OpenFace)
 set(CONFIG_DIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_CONFIG_DIR}")
 add_definitions(-DCONFIG_DIR="${CONFIG_DIR}")
 
-find_package( OpenCV REQUIRED )
+find_package( OpenCV HINTS /usr/local/Cellar/opencv/3.3.0_3/ )
 
 MESSAGE("OpenCV information:") 
 MESSAGE("  OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}") 
@@ -17,7 +17,7 @@ MESSAGE("  OpenCV_LIBRARIES: ${OpenCV_LIBRARIES}")
 MESSAGE("  OpenCV_LIBRARY_DIRS: ${OpenCV_LIBRARY_DIRS}") 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-find_package( Boost 1.5.9 REQUIRED COMPONENTS filesystem system)
+find_package( Boost 1.65.0 REQUIRED COMPONENTS filesystem system )
 MESSAGE("Boost information:") 
 MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}") 
 MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}") 
@@ -26,6 +26,13 @@ MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS}/boost)
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})	
+
+find_package( X11 REQUIRED )
+MESSAGE("X11 information:")
+MESSAGE("  X11_INCLUDE_DIR: ${X11_INCLUDE_DIR}")
+MESSAGE("  X11_LIBRARIES: ${X11_LIBRARIES}")
+MESSAGE("  X11_LIBRARY_DIRS: ${X11_LIBRARY_DIRS}")
+include_directories( ${X11_INCLUDE_DIR} )
 
 find_package(TBB REQUIRED)
 
