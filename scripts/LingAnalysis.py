@@ -6,8 +6,7 @@ from collections import defaultdict
 import sys, re, pandas, numpy, os, subprocess, json, os.path, string
 
 
-def bag_of_words(dir):
-    files = [f for f in os.listdir(dir) if f.endswith('_transcript.txt')]
+def bag_of_words(files):
     all_words = []
     for file_name in files:
         with open(os.path.join(dir, file_name), 'r') as data_file:
@@ -93,15 +92,15 @@ def get_feats(file_name, bag, lang, parser_dir):
 
     openF = open(file_name.replace('_transcript.txt', '_ling.csv'), 'w')
     bag_header = ','.join(bag).encode('ascii', 'ignore')
-    print bag_header
+    print(bag_header)
     # ToDo : figure out what is wrong with the feature header, why isnt bag of words working?
     syntax_header = 'word_count,avg_wordlen,levels,distance,univ_tag,%s' % (','.join(load_tags()))
     header = bag_header + ',' + syntax_header + '\n'
-    print header
+    print(header)
     openF.write(header)
     feature_list = []
     for sentence in transcription:
-        print sentence
+        print(sentence)
         words = sentence.strip().split()
         word_count = len(words)
         feats = []
@@ -137,4 +136,4 @@ def get_feats(file_name, bag, lang, parser_dir):
         feature_list.append(features)
     for s in feature_list:
         openF.write(s + '\n')
-    print 'Done processing non-english transcript. Linguistic features saved to file!'
+    print('Done processing non-english transcript. Linguistic features saved to file!')
