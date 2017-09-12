@@ -1,1 +1,8 @@
 scripts/config.json
+.DS_Store
+scripts/.DS_Store
+scripts/.idea/inspectionProfiles/
+scripts/.idea/misc.xml
+scripts/.idea/modules.xml
+scripts/.idea/scripts.iml
+scripts/.idea/workspace.xml
