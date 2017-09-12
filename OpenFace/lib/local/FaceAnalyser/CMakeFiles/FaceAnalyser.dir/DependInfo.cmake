@@ -21,10 +21,10 @@ set(CMAKE_TARGET_DEFINITIONS_CXX
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
+  "/usr/local/Cellar/opencv/3.3.0_3/include"
+  "/usr/local/Cellar/opencv/3.3.0_3/include/opencv"
   "/usr/local/include"
-  "/usr/local/include/opencv"
   "/usr/local/include/boost"
-  "/usr/X11R6/include"
   "lib/3rdParty/dlib/include"
   "lib/local/FaceAnalyser/./include"
   "/include"
