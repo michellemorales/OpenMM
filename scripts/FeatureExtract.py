@@ -8,6 +8,9 @@
 import sys, os, subprocess, json, LingAnalysis, pandas, scipy.stats, os.path, glob
 import speech_recognition as sr
 import numpy as np
+import zipfile
+import StringIO
+import csv
 
 
 def extract_visual(video, openface):
@@ -140,6 +143,33 @@ def json2txt(json_file):
     newF.close()
     print "Done converting json to txt - %s!"%json
 
+def load_zipfiles(dir):
+    # Get zip directories
+    zip_files = [f for f in os.listdir(dir) if f.endswith('.zip')]
+    transcripts = []
+    for z in zip_files:
+        transcript_file = dir+'/'+z
+        pid = z.split('_')[0]
+        archive = zipfile.ZipFile(transcript_file, 'r')
+        archive_files = archive.namelist()
+        for f in archive_files:
+            if 'TRANSCRIPT' in f:
+                # new_csv = open('/Users/michellemorales/Desktop/MoralesDocs/DAIC_WOZ/Transcripts/%s_transcript.txt'%pid,'w')
+                data = StringIO.StringIO(archive.read(f))  # don't forget this line!
+                reader = csv.reader(data)
+                for row in reader:
+                    if row:
+                        start, end, name, text = row[0].split('\t')
+                        if name == 'Participant':
+                            line = pid + ',' + text.strip()
+                            # new_csv.write(text.strip()+'\n')
+                            transcripts.append(line)
+    with open('/Users/michellemorales/Desktop/MoralesDocs/DAIC_WOZ/%s_transcript.csv'%pid, 'w') as new_csv:
+        for line in transcripts:
+            new_csv.write(line.split(',')[1]+'\n')
+    print 'DONE!'
+
+
 if __name__ == '__main__':
     my_dir = sys.argv[1]
     lang = sys.argv[2]
@@ -181,24 +211,24 @@ if __name__ == '__main__':
     transcript_files = [f for f in os.listdir(my_dir) if f.endswith('_transcript.txt')]
     parser_dir = pars["SYNTAXNET"]
     if lang == 'english':
-        bag = LingAnalysis.bag_of_words(my_dir)
+        bag = LingAnalysis.bag_of_words(transcript_files)
         for tf in transcript_files:
             LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang, parser_dir)
 
     elif lang == 'german':
-        bag = LingAnalysis.bag_of_words(my_dir, lang)
+        bag = LingAnalysis.bag_of_words(transcript_files)
         for tf in transcript_files:
             LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang, parser_dir)
 
     elif lang == 'spanish':
-        bag = LingAnalysis.bag_of_words(my_dir, lang)
+        bag = LingAnalysis.bag_of_words(transcript_files)
         for tf in transcript_files:
             LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang, parser_dir)
 
     # FUSION
-    transcript_files = [f for f in os.listdir(my_dir) if f.endswith('_transcript.txt')]
-    for f in transcript_files:
-        early_fusion(os.path.join(my_dir, f))
+    # transcript_files = [f for f in os.listdir(my_dir) if f.endswith('_transcript.txt')]
+    # for f in transcript_files:
+    #     early_fusion(os.path.join(my_dir, f))
 
     # Combine all data instances into one csv
     one_csv(my_dir)
