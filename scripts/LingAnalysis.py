@@ -6,9 +6,10 @@ from collections import defaultdict
 import sys, re, pandas, numpy, os, subprocess, json, os.path, string
 
 
-def bag_of_words(files):
+def bag_of_words(dir, transcript_files):
     all_words = []
-    for file_name in files:
+    print("Processing transcript files...")
+    for file_name in transcript_files:
         with open(os.path.join(dir, file_name), 'r') as data_file:
             transcription = data_file.readlines()
             # Remove punctuation and lower all characters
@@ -21,9 +22,11 @@ def bag_of_words(files):
     bag = []
     for w in all_words:
         count = all_words.count(w)
-        if count > 1 and w not in bag:
+        # Threshold = ignore any words that appear less than 10 times
+        if count > 10 and w not in bag:
             bag.append(w)
     bag = sorted(bag)
+    print("Done creating bag of words!")
     return bag
 
 
@@ -72,7 +75,6 @@ def dependency_distance(conll_df):
 def load_tags():
     # Load universal POS tag set - http://universaldependencies.org/u/pos/all.html
     tags = "ADJ ADP ADV AUX CCONJ DET INTJ NOUN NUM PART PRON PROPN PUNCT SCONJ SYM VERB X".strip().split()
-    print tags
     return tags
 
 
@@ -89,22 +91,19 @@ def tag_count(df):
 def get_feats(file_name, bag, lang, parser_dir):
     with open(os.path.join(dir, file_name), 'r') as data_file:
         transcription = data_file.readlines()
-
     openF = open(file_name.replace('_transcript.txt', '_ling.csv'), 'w')
     bag_header = ','.join(bag).encode('ascii', 'ignore')
-    print(bag_header)
-    # ToDo : figure out what is wrong with the feature header, why isnt bag of words working?
     syntax_header = 'word_count,avg_wordlen,levels,distance,univ_tag,%s' % (','.join(load_tags()))
     header = bag_header + ',' + syntax_header + '\n'
-    print(header)
     openF.write(header)
     feature_list = []
     for sentence in transcription:
-        print(sentence)
         words = sentence.strip().split()
         word_count = len(words)
         feats = []
-        if word_count > 0:
+
+        sentence = sentence.replace("'",'')
+        if word_count > 3:
             for w in bag:
                 count = words.count(w)
                 feats.append(float(count) / word_count)
@@ -129,9 +128,9 @@ def get_feats(file_name, bag, lang, parser_dir):
                 syntax_feats = [word_count, avg_wordlen, levels, distance, univ_tag] + pos_feats
             else:
                 syntax_feats = 22 * [0]
+            feats = feats + syntax_feats
         else:
-            feats = len(bag) * [0]
-        feats = feats + syntax_feats
+            feats = (len(bag) * [0]) +  22 * [0]
         features = ','.join([str(f) for f in feats]).encode('ascii', 'ignore')
         feature_list.append(features)
     for s in feature_list:
