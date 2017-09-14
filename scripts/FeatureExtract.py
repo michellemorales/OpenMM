@@ -30,7 +30,7 @@ def video2audio(video):
     print 'DONE! Video converted to audio file: %s' % wav
 
 
-def extract_audio(audio_dir, matlab):
+def extract_audio(audio_dir):
     # Covarep operates on directory of files and extracts audio features using matlab app
     matlab = '/Applications/MATLAB/MATLAB_Runtime/v92/'
     command = "./covarep/run_COVAREP_feature_extraction.sh '%s' '%s'" % (matlab, audio_dir)
@@ -169,7 +169,6 @@ def load_zipfiles(dir):
             new_csv.write(line.split(',')[1]+'\n')
     print 'DONE!'
 
-
 if __name__ == '__main__':
     my_dir = sys.argv[1]
     lang = sys.argv[2]
@@ -209,9 +208,9 @@ if __name__ == '__main__':
 
     # LING
     transcript_files = [f for f in os.listdir(my_dir) if f.endswith('_transcript.txt')]
-    parser_dir = pars["SYNTAXNET"]
+    parser_dir = pars["syntaxnet"]
     if lang == 'english':
-        bag = LingAnalysis.bag_of_words(transcript_files)
+        bag = LingAnalysis.bag_of_words(my_dir, transcript_files)
         for tf in transcript_files:
             LingAnalysis.get_feats(os.path.join(my_dir, tf), bag, lang, parser_dir)
 
@@ -231,7 +230,7 @@ if __name__ == '__main__':
     #     early_fusion(os.path.join(my_dir, f))
 
     # Combine all data instances into one csv
-    one_csv(my_dir)
+    # one_csv(my_dir)
 
     # Convert json to txt files
     # transcript_files = [f for f in os.listdir(dir) if f.endswith('_transcript.json')]
