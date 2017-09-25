@@ -5,6 +5,7 @@ import pandas
 import numpy as np
 from collections import Counter
 from sklearn import svm
+from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import Imputer
 from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score, classification_report, confusion_matrix
@@ -51,11 +52,25 @@ def early_fusion(multimodal_files):
     return mm_names, mm_feats
 
 
-# def align
-
+def handle_nans(data):
+    imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+    imp.fit(data)
+    return imp.transform(data)
 
 # TODO: add pca to early fusion
-# def add_pca()
+def add_pca(n, train_features, test_features):
+    """
+    :param features: matrix like list where each item in list is a list of features
+    :return: pca_features
+        WHERE
+        list pca_features is a matrix like list where each item is a reduced list of features
+    """
+    train = handle_nans(train_features)
+    test = handle_nans(test_features)
+    pca = PCA(n_components=n)
+    train_pca_features = pca.fit_transform(train)
+    test_pca_features = pca.transform(test)
+    return train_pca_features, test_pca_features
 
 
 def predict_regression(train_data, test_data, train_labels, test_labels):
@@ -113,7 +128,7 @@ def predict_class(train_data, test_data, train_labels, test_labels):
     imp.fit(test_data)
     test_imp = imp.transform(test_data)
 
-    clf = svm.SVC()
+    clf = svm.SVC(class_weight="balanced")
     clf.fit(train_imp, train_labels)
     predictions = clf.predict(test_imp)
     accuracy = accuracy_score(test_labels, predictions)
@@ -124,6 +139,7 @@ def predict_class(train_data, test_data, train_labels, test_labels):
     return accuracy
 
 
+# TODO: try trees algorithm, which handles unbalanced data better
 def predict_class_forest(train_data, test_data, train_labels, test_labels):
     """
     This function predicts depression class (depressed/not depressed) using an SVM classification algorithm (SVC - http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC )
@@ -157,6 +173,8 @@ def predict_class_forest(train_data, test_data, train_labels, test_labels):
     print('True negative', tn, "False positive", fp, "False negative", fn, "True positive", tp)
     return accuracy
 
+
+# TODO: try CART decision tree algorithm
 def predict_class_majorityvote(model1, model2, model3, train_labels, test_labels):
     """
     This function predicts depression class (depressed/not depressed) using an SVM classification algorithm (SVC - http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC )
@@ -183,7 +201,7 @@ def predict_class_majorityvote(model1, model2, model3, train_labels, test_labels
         imp.fit(test_data)
         test_imp = imp.transform(test_data)
 
-        clf = svm.SVC()
+        clf = svm.SVC(class_weight='balanced')
         clf.fit(train_imp, train_labels)
         preds = clf.predict(test_imp)
         prediction_matrix.append(preds)
@@ -201,6 +219,7 @@ def predict_class_majorityvote(model1, model2, model3, train_labels, test_labels
     tn, fp, fn, tp = confusion_matrix(test_labels, vote_preds).ravel()
     print('True negative', tn, "False positive", fp, "False negative", fn, "True positive", tp)
     print(accuracy)
+
 
 def late_fusion_average(model1, model2, model3, train_labels, test_labels):
     """
@@ -240,4 +259,3 @@ def late_fusion_average(model1, model2, model3, train_labels, test_labels):
     RMSE = mean_squared_error(late_predictions, test_labels) ** 0.5
     print MAE, RMSE
 
-    # TODO - voting?
