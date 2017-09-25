@@ -64,6 +64,7 @@ def get_earlyfusion():
 
     print('Done!')
 
+
 def run_experiments():
     print('\nRunning SVM experiments...\n')
     # Get training labels
@@ -124,40 +125,45 @@ def run_experiments():
     print 'Random binary baseline = ', float(d_bin_labels.count(0)) / len(d_bin_labels)
 
     # Early fusion
-    # print('Early fusion results...\n')
-    # print Fusions.predict_regression(t_features,d_features,t_labels,d_labels)
+    print('Early fusion results...\n')
+    print Fusions.predict_regression(t_features,d_features,t_labels,d_labels)
     print Fusions.predict_class(t_features,d_features,t_bin_labels,d_bin_labels)
 
+    print('Early fusion with PCA results...\n')
+    t_pca, d_pca = Fusions.add_pca(100, t_features, d_features)
+    print Fusions.predict_regression(t_pca, d_pca, t_labels, d_labels)
+    print Fusions.predict_class(t_pca, d_pca, t_bin_labels, d_bin_labels)
+    exit()
     # audio_names =  train_data.columns[1:371]
     # video_names = train_data.columns[371: 556]
     # text_names = train_data.columns[556:]
 
-    # # Audio only
-    # print('Results for audio only...\n')
+    # Audio only
+    print('Results for audio only...\n')
     audio_t = [feats[:370] for feats in t_features]
     audio_d = [feats[:370] for feats in d_features]
     # print len(audio_d[0])
     # print Fusions.predict_regression(audio_t, audio_d,t_labels,d_labels)
     print Fusions.predict_class(audio_t,audio_d,t_bin_labels,d_bin_labels)
-    #
-    # # Text only
-    # print('Results for text only...\n')
+
+    # Text only
+    print('Results for text only...\n')
     text_t = [feats[555:] for feats in t_features]
     text_d = [feats[555:] for feats in d_features]
     # print len(text_t[0])
     # print Fusions.predict_regression(text_t,text_d,t_labels,d_labels)
     print Fusions.predict_class(text_t,text_d,t_bin_labels,d_bin_labels)
-    #
-    # # Video only
-    # print('Results for video only...\n')
+
+    # Video only
+    print('Results for video only...\n')
     video_t = [feats[370:555] for feats in t_features]
     video_d = [feats[370:555] for feats in d_features]
     # print len(video_d[0])
     # print Fusions.predict_regression(video_t, video_d, t_labels,d_labels)
     print Fusions.predict_class(video_t, video_d, t_bin_labels,d_bin_labels)
 
-    # # Early fusion (Audio + Video)
-    # print('Results for audio+video only...\n')
+    # Early fusion (Audio + Video)
+    print('Results for audio+video only...\n')
     audio_video_t = [feats[:555] for feats in t_features]
     audio_video_d = [feats[:555] for feats in d_features]
     # print len(video_d[0])
@@ -165,7 +171,7 @@ def run_experiments():
     print Fusions.predict_class_forest(audio_video_t, audio_video_d, t_bin_labels,d_bin_labels)
 
     # Late fusion
-    # print('Late fusion results ...\n')
+    print('Late fusion results ...\n')
     Fusions.predict_class_majorityvote(model1 = (audio_t, audio_d), model2 = (video_t, video_d), model3 = (text_t, text_d), train_labels = t_bin_labels, test_labels = d_bin_labels)
 
 
