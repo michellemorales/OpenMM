@@ -8,5 +8,20 @@ OpenMM is an open-source tool that can perform multimodal feature extraction. In
 ## Installation
 Please see the Wiki for installation instructions.
 
+## Citing
+
+If you use any of this code in your work, please cite:
+
+OpenMM: An Open-Source Multimodal Feature Extraction Tool (Michelle Renee Morales, Stefan Scherer, Rivka Levitan), In Proceedings of Interspeech 2017, ISCA, 2017. 
+
+```
+@inproceedings{morales_openmm:_2017,
+	address = {Stockholm, Sweden},
+	title = {{OpenMM}: {An} {Open}-{Source} {Multimodal} {Feature} {Extraction} {Tool}},
+	url = {https://www.researchgate.net/publication/319185055_OpenMM_An_Open-Source_Multimodal_Feature_Extraction_Tool},
+	doi = {10.21437/Interspeech.2017-1382}}
+```
+
 ## Final Note
 This repo represents code from my dissertation work. I did my best to ensure that the code runs out of the box, but there are always issues. So please understand that this is research code and not a commercial level product. However, if you encounter any problems/bugs/issues please contact me on github or email me at mmorales@gradcenter.cuny.edu for any bug reports/questions/suggestions.
+

@@ -1,6 +1,6 @@
 {"deployedMCRroot": "",
-"openface": "/Users/michellemorales/GitHub/OpenMM/OpenFace/bin/FeatureExtraction",
-"syntaxnet" : "/Users/michellemorales/GitHub/OpenMM/models/syntaxnet",
+"openface": "",
+"syntaxnet" : "",
 "GOOGLE_API_KEY" : "",
 "IBM_USERNAME" : "",
 "IBM_PASSWORD" : ""}
