@@ -11,7 +11,6 @@ from sklearn.preprocessing import Imputer
 from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score, classification_report, confusion_matrix
 
 
-
 def early_fusion(multimodal_files):
     """
     This function fuses unimodal data files into one multimodal csv file
@@ -57,7 +56,7 @@ def handle_nans(data):
     imp.fit(data)
     return imp.transform(data)
 
-# TODO: add pca to early fusion
+
 def add_pca(n, train_features, test_features):
     """
     :param features: matrix like list where each item in list is a list of features
@@ -139,7 +138,6 @@ def predict_class(train_data, test_data, train_labels, test_labels):
     return accuracy
 
 
-# TODO: try trees algorithm, which handles unbalanced data better
 def predict_class_forest(train_data, test_data, train_labels, test_labels):
     """
     This function predicts depression class (depressed/not depressed) using an SVM classification algorithm (SVC - http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC )
@@ -174,7 +172,6 @@ def predict_class_forest(train_data, test_data, train_labels, test_labels):
     return accuracy
 
 
-# TODO: try CART decision tree algorithm
 def predict_class_majorityvote(model1, model2, model3, train_labels, test_labels):
     """
     This function predicts depression class (depressed/not depressed) using an SVM classification algorithm (SVC - http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC )
@@ -192,27 +189,26 @@ def predict_class_majorityvote(model1, model2, model3, train_labels, test_labels
         i += 1
         train_data = model[0]
         test_data = model[1]
-        imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
-        imp.fit(train_data)
-        train_imp = imp.transform(train_data)
-
-        # Handle missing data in dev
-        imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
-        imp.fit(test_data)
-        test_imp = imp.transform(test_data)
-
+        # Handle nans
+        train = handle_nans(train_data)
+        test = handle_nans(test_data)
+        # Create svm and fit model
         clf = svm.SVC(class_weight='balanced')
-        clf.fit(train_imp, train_labels)
-        preds = clf.predict(test_imp)
+        clf.fit(train, train_labels)
+        # Make predictions for each model
+        preds = clf.predict(test)
         prediction_matrix.append(preds)
     matrix = pandas.DataFrame(prediction_matrix)
     vote_preds = []
+    # For each instance find the majority class label
     for column in matrix:
         labels = matrix[column].values
         # Find majority
         count = Counter(labels)
+        # Majority vote is the ultimate prediction
         majority_vote = count.most_common()[0][0]
         vote_preds.append(majority_vote)
+    # Determine late fusion results
     accuracy = accuracy_score(test_labels, vote_preds)
     print(classification_report(test_labels, vote_preds))
     print(confusion_matrix(test_labels, vote_preds))
@@ -259,3 +255,6 @@ def late_fusion_average(model1, model2, model3, train_labels, test_labels):
     RMSE = mean_squared_error(late_predictions, test_labels) ** 0.5
     print MAE, RMSE
 
+# TODO: create hybrid approach
+# TODO: try CART decision tree algorithm
+# TODO: try trees algorithm, which handles unbalanced data better
