@@ -122,14 +122,14 @@ def run_experiments():
         d_labels.append(label)
         d_bin_labels.append(b_label)
 
-    print 'Random binary baseline = ', float(d_bin_labels.count(0)) / len(d_bin_labels)
+    # print 'Random binary baseline = ', float(d_bin_labels.count(0)) / len(d_bin_labels)
 
 
 
-    # audio_names =  train_data.columns[1:371]
+    audio_names =  train_data.columns[1:371]
     # video_names = train_data.columns[371: 556]
-    # video_names = train_data.columns[446:546] # Look at AUs only
-    # text_names = train_data.columns[556:]
+    video_names = train_data.columns[446:546] # Look at AUs only
+    text_names = train_data.columns[556:]
 
     # Audio only
     print('Results for audio only...\n')
@@ -138,6 +138,7 @@ def run_experiments():
     # print len(audio_d[0])
     # print Fusions.predict_regression(audio_t, audio_d,t_labels,d_labels)
     # print Fusions.predict_class(audio_t,audio_d,t_bin_labels,d_bin_labels)
+    Fusions.upsample_data(audio_t, t_bin_labels, audio_names, audio_d, d_bin_labels)
 
     # Text only
     print('Results for text only...\n')
@@ -146,6 +147,7 @@ def run_experiments():
     # print len(text_t[0])
     # print Fusions.predict_regression(text_t,text_d,t_labels,d_labels)
     # print Fusions.predict_class(text_t,text_d,t_bin_labels,d_bin_labels)
+    Fusions.upsample_data(text_t, t_bin_labels, text_names, text_d, d_bin_labels)
 
     # Video only
     print('Results for video only...\n')
@@ -159,29 +161,33 @@ def run_experiments():
     # print Fusions.predict_regression(video_t, video_d, t_labels,d_labels)
     # print Fusions.predict_class(video_t, video_d, t_bin_labels,d_bin_labels)
 
-    # Early fusion
-    early_train = []
-    early_dev = []
+    # Try upsampling on each unimodal dataset
+    Fusions.upsample_data(video_t, t_bin_labels, video_names, video_d, d_bin_labels)
 
-    for i, f in enumerate(audio_t):
-        early = audio_t[i].tolist() +video_t[i].tolist()+text_t[i].tolist()
-        early_train.append(early)
-
-    for i, f in enumerate(audio_d):
-        early_dev.append(audio_d[i].tolist() + video_d[i].tolist() + text_d[i].tolist())
-
-    # print('Early fusion results...\n')
-    # print Fusions.predict_regression(early_train, early_dev, t_labels, d_labels)
-    # print Fusions.predict_class(early_train, early_dev, t_bin_labels, d_bin_labels)
-
-    print('Early fusion with PCA results...\n')
-    t_pca, d_pca = Fusions.add_pca(1000, early_train, early_dev)
-    print Fusions.predict_regression(t_pca, d_pca, t_labels, d_labels)
-    print Fusions.predict_class(t_pca, d_pca, t_bin_labels, d_bin_labels)
-
-    # Late fusion
-    # print('Late fusion results ...\n')
-    # Fusions.predict_class_majorityvote(model1 = (audio_t, audio_d), model2 = (video_t, video_d), model3 = (text_t, text_d), train_labels = t_bin_labels, test_labels = d_bin_labels)
+    #
+    # # Early fusion
+    # early_train = []
+    # early_dev = []
+    #
+    # for i, f in enumerate(audio_t):
+    #     early = audio_t[i].tolist() +video_t[i].tolist()+text_t[i].tolist()
+    #     early_train.append(early)
+    #
+    # for i, f in enumerate(audio_d):
+    #     early_dev.append(audio_d[i].tolist() + video_d[i].tolist() + text_d[i].tolist())
+    #
+    # # print('Early fusion results...\n')
+    # # print Fusions.predict_regression(early_train, early_dev, t_labels, d_labels)
+    # # print Fusions.predict_class(early_train, early_dev, t_bin_labels, d_bin_labels)
+    #
+    # print('Early fusion with PCA results...\n')
+    # t_pca, d_pca = Fusions.add_pca(1000, early_train, early_dev)
+    # print Fusions.predict_regression(t_pca, d_pca, t_labels, d_labels)
+    # print Fusions.predict_class(t_pca, d_pca, t_bin_labels, d_bin_labels)
+    #
+    # # Late fusion
+    # # print('Late fusion results ...\n')
+    # # Fusions.predict_class_majorityvote(model1 = (audio_t, audio_d), model2 = (video_t, video_d), model3 = (text_t, text_d), train_labels = t_bin_labels, test_labels = d_bin_labels)
 
 
 run_experiments()
