@@ -5,7 +5,7 @@ import StringIO
 
 dir = '/Volumes/MORALES/Data/DAIC_WOZ/'
 zip_files = [f for f in os.listdir(dir) if f.endswith('.zip')]
-for z in zip_files[12:]:
+for z in zip_files[80:]:
     filename = dir + z
     # print filename
     pid = z.split('_')[0]
