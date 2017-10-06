@@ -9,7 +9,8 @@ from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import Imputer
 from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score, classification_report, confusion_matrix
-
+from sklearn.linear_model import LogisticRegression
+from sklearn.utils import resample
 
 def early_fusion(multimodal_files):
     """
@@ -255,6 +256,49 @@ def late_fusion_average(model1, model2, model3, train_labels, test_labels):
     RMSE = mean_squared_error(late_predictions, test_labels) ** 0.5
     print MAE, RMSE
 
+
+def upsample_data(train_data, train_labels, headers, test_data, test_labels):
+    """Upsample training data to have balanced classes"""
+    df = pandas.DataFrame(train_data, columns=headers)
+    print(df.isnull().values.any())
+    df.fillna(df.mean())
+    print(df.isnull().values.any())
+    df['label'] = train_labels
+
+    # Separate majority and minority classes
+    df_majority = df[df.label == 0]
+    df_minority = df[df.label == 1]
+
+    # Upsample minority class
+    df_minority_upsampled = resample(df_minority,
+                                     replace=True,  # sample with replacement
+                                     n_samples= df_majority.shape[0],  # to match majority class
+                                     random_state=123)  # reproducible results
+
+    # Combine majority class with upsampled minority class
+    df_upsampled = pandas.concat([df_majority, df_minority_upsampled])
+
+    # Display new class counts
+    # print df_upsampled.label.value_counts()
+    # print df_upsampled.label.values
+
+    # Separate input features (X) and target variable (y)
+    y = df_upsampled.label
+    X = df_upsampled.drop('label', axis=1)
+    test = pandas.DataFrame(test_data, columns=headers)
+
+    clf = svm.SVC()
+    clf.fit(X, y)
+    preds = clf.predict(test)
+    print(accuracy_score(preds, test_labels))
+    print(classification_report(preds, test_labels))
+    print(confusion_matrix(preds, test_labels))
+    # return X, y
+
+
+
+# def hybrid():
+# def trees():
 # TODO: create hybrid approach
 # TODO: try CART decision tree algorithm
 # TODO: try trees algorithm, which handles unbalanced data better
