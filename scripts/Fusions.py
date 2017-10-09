@@ -295,7 +295,28 @@ def upsample_data(train_data, train_labels, headers, test_data, test_labels):
     print(confusion_matrix(preds, test_labels))
     # return X, y
 
+def optimize_c(train_data, test_data, train_labels, test_labels):
+    # Test out different C parameter values (10^-5 to 10^5)
 
+    # Handle missing data in train
+    train = handle_nans(train_data)
+    test = handle_nans(test_data)
+
+    results = []
+    for x in range(-5, 5):
+        print "----------------------------------------"
+        C = 10 ** x
+        print "C-paramter", C
+        clf = svm.SVC(C=C, class_weight="balanced")
+        clf.fit(train, train_labels)
+        predictions = clf.predict(test)
+        accuracy = accuracy_score(test_labels, predictions)
+        print(classification_report(test_labels, predictions))
+        print(confusion_matrix(test_labels, predictions))
+        tn, fp, fn, tp = confusion_matrix(test_labels, predictions).ravel()
+        print('True negative', tn, "False positive", fp, "False negative", fn, "True positive", tp)
+        print accuracy
+        print "----------------------------------------\n"
 
 # def hybrid():
 # def trees():
