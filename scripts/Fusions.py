@@ -5,12 +5,15 @@ import pandas
 import numpy as np
 from collections import Counter
 from sklearn import svm
+from sklearn.model_selection import cross_val_score
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import Imputer
+from sklearn import metrics
 from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score, classification_report, confusion_matrix
-from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import LeaveOneOut
 from sklearn.utils import resample
+
 
 def early_fusion(multimodal_files):
     """
@@ -295,6 +298,7 @@ def upsample_data(train_data, train_labels, headers, test_data, test_labels):
     print(confusion_matrix(preds, test_labels))
     # return X, y
 
+
 def optimize_c(train_data, test_data, train_labels, test_labels):
     # Test out different C parameter values (10^-5 to 10^5)
 
@@ -317,6 +321,20 @@ def optimize_c(train_data, test_data, train_labels, test_labels):
         print('True negative', tn, "False positive", fp, "False negative", fn, "True positive", tp)
         print accuracy
         print "----------------------------------------\n"
+
+
+def predict_class_cv(data, labels):
+    # Handle missing data in train
+    X = handle_nans(data)
+    y = labels
+    clf = svm.SVC(kernel='linear', C=1, class_weight="balanced")
+    metric_name = "precision"
+    scores = cross_val_score(clf, X, y, cv=5, scoring=metric_name)
+    print metric_name
+    print scores
+    print np.mean(scores)
+    print np.max(scores)
+    print '\n\n\n'
 
 # def hybrid():
 # def trees():
