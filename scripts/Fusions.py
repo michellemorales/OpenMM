@@ -3,16 +3,18 @@
 """ This is module for performing different multimodal fusion experiments """
 import pandas
 import numpy as np
+import eli5
 from collections import Counter
 from sklearn import svm
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, cross_validate
 from sklearn.decomposition import PCA
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.preprocessing import Imputer
-from sklearn import metrics
+from sklearn import preprocessing
 from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score, classification_report, confusion_matrix
-from sklearn.model_selection import LeaveOneOut
 from sklearn.utils import resample
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import RFECV
 
 
 def early_fusion(multimodal_files):
@@ -326,16 +328,68 @@ def optimize_c(train_data, test_data, train_labels, test_labels):
 def predict_class_cv(data, labels):
     # Handle missing data in train
     X = handle_nans(data)
+    # Scale data
+    min_max_scaler = preprocessing.MinMaxScaler()
+    X_scaled = min_max_scaler.fit_transform(X)
+    # Get labels
     y = labels
-    clf = svm.SVC(kernel='linear', C=1, class_weight="balanced")
-    metric_name = "precision"
-    scores = cross_val_score(clf, X, y, cv=5, scoring=metric_name)
-    print metric_name
-    print scores
-    print np.mean(scores)
-    print np.max(scores)
+    clf = svm.SVC(kernel='linear', C=.1, class_weight="balanced", random_state=0)
+    print clf
+    metric_names = ["precision", "recall", "f1"]
+    scores = cross_validate(clf, X_scaled, y, cv=5, scoring=metric_names)
+    print clf
+    print "Precision Train = %s\nPrecision Test= %s\n" % (np.mean(scores['train_precision']), np.mean(scores['test_precision']))
+    print "Recall Train = %s\nRecall Test= %s\n" % (np.mean(scores['train_recall']), np.mean(scores['test_recall']))
+    print "F1 Train = %s\nF1 Test= %s\n" %(np.mean(scores['train_f1']), np.mean(scores['test_f1']))
     print '\n\n\n'
 
+def plot_best(p_values, predictors):
+    import matplotlib.pyplot as plt
+    # Get the raw p-values for each feature, and transform from p-values into scores
+    scores = -np.log10(p_values)
+
+    # Plot the scores
+    plt.bar(range(len(predictors)), scores)
+    plt.xticks(range(len(predictors)), predictors, rotation='vertical',fontsize=16)
+    plt.show()
+
+def get_best_features(data,labels, names):
+    from sklearn.feature_selection import SelectKBest, f_classif
+    # Handle missing data in train
+    X = handle_nans(data)
+    # Scale data
+    min_max_scaler = preprocessing.MinMaxScaler()
+    X = min_max_scaler.fit_transform(X)
+    y = labels
+    predictors = names
+    # Perform feature selection
+    selector = SelectKBest(f_classif, k=20)
+    selector.fit(X,y)
+    booleans = selector.get_support()
+    best_features = []
+    for i, b in enumerate(booleans):
+        if b == True:
+            best_features.append(predictors[i])
+    # plot_best(selector.pvalues_, predictors)
+    return best_features, selector.transform(X)
+
+def plot_coefficients(X, y, feature_names, top_features=5):
+    import matplotlib.pyplot as plt
+    clf = svm.SVC(kernel='linear', C=.1, class_weight="balanced", random_state=0)
+    clf.fit(X, y)
+    coef = clf.coef_.ravel()
+    top_positive_coefficients = np.argsort(coef)[-top_features:]
+    top_negative_coefficients = np.argsort(coef)[:top_features]
+    top_coefficients = np.hstack([top_negative_coefficients, top_positive_coefficients])
+    # create plot
+    plt.figure(figsize=(15, 5))
+    colors = ['red' if c < 0 else 'blue' for c in coef[top_coefficients]]
+    plt.bar(np.arange(2 * top_features), coef[top_coefficients], color=colors)
+    feature_names = np.array(feature_names)
+    plt.xticks(np.arange(0, 1 + 2 * top_features), feature_names[top_coefficients], rotation=60, ha='right',fontsize=14)
+    plt.show()
+
+# def plot_features()
 # def hybrid():
 # def trees():
 # TODO: create hybrid approach
