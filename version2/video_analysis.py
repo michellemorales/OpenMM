@@ -17,8 +17,8 @@ def extract_visual(video):
         print("Video file does not exist.")
 
 
-def video2audio(video):
+def video_to_audio(video):
     # Converts video to audio
-    audio_file = video.replace('.mp4', '.mp3')
+    audio_file = video.replace('.mp4', '.wav')
     clip = mp.VideoFileClip(video).subclip(0, 20)
     clip.audio.write_audiofile(audio_file)
