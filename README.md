@@ -5,8 +5,7 @@ OpenMM is an open-source tool that can perform multimodal feature extraction. In
 
 ![alt tag](https://github.com/michellemorales/OpenMM/blob/master/images/PipelineVersion3.jpeg)
 
-## Installation
-Please see the Wiki for installation instructions.
+To install [please see installation instructions below](#Installation).
 
 ## Citing
 
@@ -59,5 +58,29 @@ To extract syntactic features, which are part of the linguistic analysis, [Synta
 After all the prerequisities and dependencies are installed successfully. You can install OpenMM by cloning this repo:
 
 `git clone https://github.com/michellemorales/OpenMM.git`
+
+
+## Running OpenMM
+
+First, fill out the `config.txt` file with all the necessary information, which includes:
+
+* `deployedMCRroot = path_to_matlab_runtime`
+* `openface = /path_to_openface/OpenFace/bin/FeatureExtraction`
+* `syntaxnet = /path_to_syntaxnet/models/syntaxnet`
+* `GOOGLE_SPEECH_RECOGNITION_API_KEY = "GOOGLE_KEY"`
+* `IBM_USERNAME = "IBM_USERNAME"`
+* `IBM_PASSWORD = "PASSWORD"`
+
+OpenMM takes as input a video (.mp4 only). To run OpenMM use the following command:
+
+`python OpenMM/scripts/FeatureExtract.py video.mp4`
+
+OpenMM will output the following files:
+* video.wav
+* video_transcript.txt
+* video_openface.csv
+* video_covarep.csv
+* video_ling.csv
+* video_multimodal.csv
 
 
