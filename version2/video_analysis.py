@@ -5,7 +5,7 @@ import moviepy.editor as mp
 
 def extract_visual(video):
     # Extracts visual features using OpenFace, requires the OpenFace () repo to be installed
-    csv = video.replace('.mp4', '_openface.csv')
+    csv = video.replace('.mp4', '_visual.csv')
     if os.path.isfile(video):
         try:
             command = '{openface_path} -f {input_file} -of {output_file}'.format(openface_path='OpenFace/build/bin/FeatureExtraction', input_file=video, output_file=csv)
